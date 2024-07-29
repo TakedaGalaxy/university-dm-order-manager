@@ -1,0 +1,14 @@
+{
+  "watch": [
+    "src"
+  ],
+  "ext": "ts,json",
+  "ignore": [
+    "node_modules"
+  ],
+  "exec": "ts-node src/main.ts",
+  "env": {
+    "ADDRESS": "127.0.0.1",
+    "PORT": "4000"
+  }
+}
