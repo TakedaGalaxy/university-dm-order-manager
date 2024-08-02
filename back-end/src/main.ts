@@ -4,9 +4,9 @@ import "dotenv/config";
 import routerAuth from "./router/auth/router-auth";
 import { PrismaClient } from "@prisma/client";
 
-const { ADDRESS, PORT } = process.env;
+const { ADDRESS, PORT, CRYPTO_KEY } = process.env;
 
-if (ADDRESS === undefined || PORT === undefined) throw "DOTNOT"
+if (ADDRESS === undefined || PORT === undefined || CRYPTO_KEY === undefined) throw ".ENV invalid !"
 
 const app = express();
 

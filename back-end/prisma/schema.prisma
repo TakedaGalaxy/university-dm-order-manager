@@ -26,8 +26,8 @@ model User {
   id              Int         @id @default(autoincrement())
   name            String
   password        String
-  deleted         Boolean
-  activeTokenId   String
+  activeTokenId   String?
+  deleted         Boolean     @default(false)
   company         Company     @relation(fields: [companyId], references: [id])
   companyId       Int
   profileType     ProfileType @relation(fields: [profileTypeName], references: [name])

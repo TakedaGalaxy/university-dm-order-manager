@@ -16,6 +16,25 @@ export default class ServiceAuth {
 
   async signIn(body: BodySignInServiceAuth) {
     const { companyName, userName, userPassword } = body;
-    console.log(companyName, userName, userPassword);
+
+    const encryptedPassword = "";
+
+    await this.prismaClient.$transaction(async (client) => {
+
+      const company = await client.company.create({
+        data: {
+          name: companyName
+        }
+      });
+
+      const user = await client.user.create({
+        data: {
+          name: userName,
+          password: encryptedPassword,
+          companyId: company.id,
+          profileTypeName: "adm"
+        }
+      })
+    });
   }
 }

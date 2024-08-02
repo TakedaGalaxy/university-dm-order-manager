@@ -24,6 +24,6 @@ export default function routerAuth(prismaClient: PrismaClient): Router {
       response.status(200).json({ message: "Sucesso", description: "Usuario criado com sucesso !" });
     }
   );
-
+  
   return router;
 }
