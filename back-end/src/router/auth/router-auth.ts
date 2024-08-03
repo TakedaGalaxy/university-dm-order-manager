@@ -2,8 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import ServiceAuth, { BodySignInServiceAuth } from "../../services/auth/service-auth";
 import middlewareBodyVerify from "../../middleware/body-verify/body-verify";
+import Security from "../../utils/security/security";
 
-export default function routerAuth(prismaClient: PrismaClient): Router {
+export default function routerAuth(prismaClient: PrismaClient, security: Security): Router {
   const router = Router();
 
   const serviceAuth = new ServiceAuth(prismaClient);
@@ -14,16 +15,16 @@ export default function routerAuth(prismaClient: PrismaClient): Router {
       const { body } = request;
 
       try {
-        await serviceAuth.signIn(body);
+        await serviceAuth.signIn(body, security);
       } catch (error) {
         console.error(error);
-        response.status(500).json({ message: "Error", description: "" });
+        response.status(500).json({ message: "Error", description: `${error}` });
         return;;
       }
 
       response.status(200).json({ message: "Sucesso", description: "Usuario criado com sucesso !" });
     }
   );
-  
+
   return router;
 }

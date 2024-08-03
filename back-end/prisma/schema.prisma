@@ -36,6 +36,8 @@ model User {
   OrderBeingMade  Order[]     @relation("OrderBeingMadeBy")
   OrderCompleted  Order[]     @relation("OrderCompletedBy")
   OrderDelivered  Order[]     @relation("OrderDeliveredBy")
+
+  @@unique([name, companyId])
 }
 
 model Order {

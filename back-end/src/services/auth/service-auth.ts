@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import Security from "../../utils/security/security";
+import { ProfileType } from "../../types/types";
 
 export type BodySignInServiceAuth = {
   userName: string,
@@ -14,25 +16,30 @@ export default class ServiceAuth {
   }
 
 
-  async signIn(body: BodySignInServiceAuth) {
+  async signIn(body: BodySignInServiceAuth, security: Security) {
     const { companyName, userName, userPassword } = body;
 
-    const encryptedPassword = "";
+    if (await this.prismaClient.company.findUnique({
+      where: {
+        name: companyName
+      }
+    }) !== null) throw "Empresa já cadastrada !"
+
+    const encryptedUserPassword = security.encrypt(userPassword);
 
     await this.prismaClient.$transaction(async (client) => {
-
       const company = await client.company.create({
         data: {
           name: companyName
         }
       });
 
-      const user = await client.user.create({
+      await client.user.create({
         data: {
           name: userName,
-          password: encryptedPassword,
+          password: encryptedUserPassword,
           companyId: company.id,
-          profileTypeName: "adm"
+          profileTypeName: ProfileType.adm
         }
       })
     });

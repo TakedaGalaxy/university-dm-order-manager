@@ -4,7 +4,8 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "setup": "ts-node setup.ts"
   },
   "author": "",
   "license": "ISC",

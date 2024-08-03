@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import routerAuth from "./router/auth/router-auth";
 import { PrismaClient } from "@prisma/client";
+import Security from "./utils/security/security";
 
 const { ADDRESS, PORT, CRYPTO_KEY } = process.env;
 
@@ -20,7 +21,7 @@ app.get("/", (request, response) => {
 
 const prismaClient = new PrismaClient();
 
-app.use("/auth", routerAuth(prismaClient));
+app.use("/auth", routerAuth(prismaClient, new Security(CRYPTO_KEY)));
 
 app.listen(Number(PORT), ADDRESS, () => {
   console.log(`[SERVER]: http://${ADDRESS}:${PORT}`);
