@@ -26,6 +26,13 @@ class LoginForm extends StatelessWidget {
             const SizedBox(height: MySizes.spaceBtwInputFields),
             TextFormField(
               decoration: const InputDecoration(
+                prefixIcon: Icon(Iconsax.house), 
+                labelText: MyTexts.company
+              ),
+            ),
+            const SizedBox(height: MySizes.spaceBtwInputFields),
+            TextFormField(
+              decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.password_check), 
                 labelText: MyTexts.password,
                 suffixIcon: Icon(Iconsax.eye_slash), 
