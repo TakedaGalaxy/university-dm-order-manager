@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import Security from "../../utils/security/security";
+import Security, { PayloadAcessToken } from "../../utils/security/security";
 import { ProfileType } from "../../types/types";
+import { DataMessage, generateMessage } from "../../utils/message/message";
 export default class ServiceAuth {
   prismaClient: PrismaClient;
 
@@ -9,7 +10,7 @@ export default class ServiceAuth {
   }
 
 
-  async signIn(body: BodySignInServiceAuth, security: Security) {
+  async signIn(body: BodySignInServiceAuth, security: Security): Promise<DataMessage> {
     const { companyName, userName, userPassword } = body;
 
     if (await this.prismaClient.company.findUnique({
@@ -36,6 +37,8 @@ export default class ServiceAuth {
         }
       });
     });
+
+    return generateMessage("Sucesso", "Usuario criado !");
   }
 
   async logIn(body: BodyLogInServiceAuth, security: Security): Promise<ResponseLogInServiceAuth> {
@@ -80,6 +83,21 @@ export default class ServiceAuth {
     return {
       accessToken
     }
+  }
+
+  async logOut(payloadAccessToken: PayloadAcessToken): Promise<DataMessage> {
+    const { userId } = payloadAccessToken;
+
+    await this.prismaClient.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        activeTokenId: null
+      }
+    })
+
+    return generateMessage("Sucesso", "Usuario deslogado !");
   }
 }
 

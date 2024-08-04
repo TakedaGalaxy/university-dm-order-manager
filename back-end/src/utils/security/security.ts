@@ -34,13 +34,13 @@ export default class Security {
     return decrypted.toString();
   }
 
-  generateAccessToken(userName: number, companyName: number): { accessToken: string, tokenId: string } {
+  generateAccessToken(userId: number, companyId: number): { accessToken: string, tokenId: string } {
     // Dados do usuário (payload) que serão incorporados no token
-    const tokenId = `${userName}:${new Date().getTime()}`;
+    const tokenId = `${userId}:${new Date().getTime()}`;
 
-    const payload = {
-      userName,
-      companyName,
+    const payload: PayloadAcessToken = {
+      userId,
+      companyId,
       tokenId
     };
 
