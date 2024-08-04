@@ -4,11 +4,13 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "setup": "ts-node setup.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.17.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "cors": "^2.8.5",
