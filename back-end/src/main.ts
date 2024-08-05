@@ -4,6 +4,7 @@ import "dotenv/config";
 import routerAuth from "./router/auth/router-auth";
 import { PrismaClient } from "@prisma/client";
 import Security, { PayloadAcessToken } from "./utils/security/security";
+import routerUser from "./router/user/router-user";
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -29,7 +30,10 @@ app.get("/", (request, response) => {
 
 const prismaClient = new PrismaClient();
 
-app.use("/auth", routerAuth(prismaClient, new Security(CRYPTO_KEY)));
+const security = new Security(CRYPTO_KEY);
+
+app.use("/auth", routerAuth(prismaClient, security));
+app.use("/user", routerUser(prismaClient, security));
 
 app.listen(Number(PORT), ADDRESS, () => {
   console.log(`[SERVER]: http://${ADDRESS}:${PORT}`);
