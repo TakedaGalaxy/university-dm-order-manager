@@ -38,7 +38,7 @@ class LoginController extends GetxController {
 
       Get.to(() => const DashboardScreen());
     } catch (e) {
-      MyHelperFunctions.showSnackBar(MyTexts.loginError);
+      MyHelperFunctions.showSnackBar(MyTexts.loginError, 'Red');
     }
   }
 }
