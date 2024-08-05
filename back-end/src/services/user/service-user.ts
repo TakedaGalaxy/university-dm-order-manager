@@ -85,9 +85,64 @@ export default class ServiceUser {
 
     return generateMessage("Sucesso", "Usuario criado !");
   }
+
+  async update(payloadAccessToken: PayloadAcessToken, userId: number, body: BodyCreateServiceUser, security: Security): Promise<DataMessage> {
+    const { name, password, profileTypeName } = body;
+
+    if (await this.prismaClient.profileType.findUnique({
+      where: {
+        name: profileTypeName
+      }
+    }) === null)
+      throw "Tipo de conta não encontrada !";
+
+    if (await this.prismaClient.user.findUnique({
+      where: {
+        name_companyId: {
+          name: name,
+          companyId: payloadAccessToken.companyId,
+        }
+      }
+    }) !== null)
+      throw "Name de usuario em uso !";
+
+    if (await this.prismaClient.user.findUnique({
+      where: {
+        id: userId,
+        companyId: payloadAccessToken.companyId,
+        deleted: false
+      }
+    }) === null)
+      throw "Usuario não encontrado!";
+
+    await this.prismaClient.user.update({
+      where: {
+        id: userId,
+        companyId: payloadAccessToken.companyId,
+        deleted: false
+      },
+      data: {
+        name,
+        password: security.encrypt(password),
+        profileTypeName: profileTypeName,
+        companyId: payloadAccessToken.companyId,
+        activeTokenId: null
+      }
+    })
+
+    return generateMessage("Sucesso", "Usuario atualizado !");
+
+
+  }
 }
 
 export type BodyCreateServiceUser = {
+  name: string,
+  password: string,
+  profileTypeName: string,
+}
+
+export type BodyUpdateServiceUser = {
   name: string,
   password: string,
   profileTypeName: string,

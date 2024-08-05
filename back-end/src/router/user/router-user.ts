@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { middlewareAuth } from "../../middleware/auth/auth";
 import Security from "../../utils/security/security";
-import ServiceUser, { BodyCreateServiceUser } from "../../services/user/service-user";
+import ServiceUser, { BodyCreateServiceUser, BodyUpdateServiceUser } from "../../services/user/service-user";
 import middlewareBodyVerify from "../../middleware/body-verify/body-verify";
 
 export default function routerUser(prismaClient: PrismaClient, security: Security): Router {
@@ -46,6 +46,21 @@ export default function routerUser(prismaClient: PrismaClient, security: Securit
 
       try {
         response.status(200).json(await serviceUser.create(payloadAccessToken!, body, security));
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ message: "Error", description: `${error}` });
+      }
+    }
+  );
+
+  router.post("/:id",
+    middlewareAuth(prismaClient, security, ["adm"]),
+    middlewareBodyVerify<BodyUpdateServiceUser>(["name", "password", "profileTypeName"]),
+    async (request, response) => {
+      const { payloadAccessToken, body, params } = request;
+
+      try {
+        response.status(200).json(await serviceUser.update(payloadAccessToken!, Number(params.id), body, security));
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
