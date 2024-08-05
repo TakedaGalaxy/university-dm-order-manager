@@ -124,6 +124,9 @@ export default class ServiceOrder {
 
     if (order.cancelled)
       throw "Pedido já cancelado !";
+    
+    if (order.deliveredAt !== null)
+      throw "Pedido já entregue, não  pode ser cancelado!";
 
     await this.prismaClient.order.update({
       where: {
@@ -188,13 +191,13 @@ export default class ServiceOrder {
 
     if (order.beingMandeAt === null)
       throw "Pedido não foi começado !";
-    
+
     if (order.completedAt !== null)
       throw "Pedido já foi completo !";
 
     if (order.beingMadeByUserId !== payloadAccessToken.userId)
       throw "Pedido está sendo feito por outro usuario !";
-    
+
     await this.prismaClient.order.update({
       where: {
         id,
@@ -207,6 +210,37 @@ export default class ServiceOrder {
     });
 
     return generateMessage("Sucesso", "Pedido marcado como completo !");
+  }
+
+  async setProducing(payloadAccessToken: PayloadAcessToken, id: number) {
+    const order = await this.prismaClient.order.findUnique({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId
+      }
+    });
+
+    if (order === null)
+      throw "Pedido não encontrado !";
+
+    if (order.cancelled)
+      throw "Pedido cancelado !";
+
+    if (order.beingMandeAt !== null)
+      throw "Pedido já foi começado a ser feito !";
+
+    await this.prismaClient.order.update({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId
+      },
+      data: {
+        beingMadeByUserId: payloadAccessToken.userId,
+        beingMandeAt: new Date()
+      }
+    });
+
+    return generateMessage("Sucesso", "Pedido marcado como sendo feito !");
   }
 }
 
