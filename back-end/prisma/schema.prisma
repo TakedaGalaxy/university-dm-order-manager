@@ -48,7 +48,7 @@ model Order {
   company           Company  @relation(fields: [companyId], references: [id])
   companyId         Int
   createdByUser     User     @relation("OrderCreatedBy", fields: [createdByUserId], references: [id])
-  crearedAt         DateTime @default(now())
+  createdAt         DateTime @default(now())
   createdByUserId   Int
   beingMadeByUser   User?    @relation("OrderBeingMadeBy", fields: [beingMadeByUserId], references: [id])
   beingMandeAt      DateTime?
