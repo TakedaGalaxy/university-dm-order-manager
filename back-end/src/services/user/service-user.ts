@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { PayloadAcessToken } from "../../utils/security/security";
+import Security, { PayloadAcessToken } from "../../utils/security/security";
+import { DataMessage, generateMessage } from "../../utils/message/message";
 
 export default class ServiceUser {
   prismaClient: PrismaClient;
@@ -52,4 +53,42 @@ export default class ServiceUser {
 
     return user;
   }
+
+  async create(payloadAccessToken: PayloadAcessToken, body: BodyCreateServiceUser, security: Security): Promise<DataMessage> {
+    const { name, password, profileTypeName } = body;
+
+    if (await this.prismaClient.profileType.findUnique({
+      where: {
+        name: profileTypeName
+      }
+    }) === null)
+      throw "Tipo de conta não encontrada !";
+
+    if (await this.prismaClient.user.findUnique({
+      where: {
+        name_companyId: {
+          name: name,
+          companyId: payloadAccessToken.companyId,
+        }
+      }
+    }) !== null)
+      throw "Name de usuario em uso !";
+
+    await this.prismaClient.user.create({
+      data: {
+        name,
+        password: security.encrypt(password),
+        profileTypeName: profileTypeName,
+        companyId: payloadAccessToken.companyId
+      }
+    })
+
+    return generateMessage("Sucesso", "Usuario criado !");
+  }
+}
+
+export type BodyCreateServiceUser = {
+  name: string,
+  password: string,
+  profileTypeName: string,
 }
