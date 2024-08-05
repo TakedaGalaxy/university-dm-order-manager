@@ -25,9 +25,9 @@ class MyHelperFunctions {
     }
   }
 
-  static void showSnackBar(String message) {
+  static void showSnackBar(String message, String color) {
     ScaffoldMessenger.of(Get.context!)
-        .showSnackBar(SnackBar(content: Text(message)));
+        .showSnackBar(SnackBar(content: Text(message), backgroundColor: getColor(color)));
   }
 
   static void showAlert(String title, String message) {

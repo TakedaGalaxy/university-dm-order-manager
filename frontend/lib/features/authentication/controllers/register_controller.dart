@@ -35,7 +35,7 @@ class RegisterController extends GetxController {
 
       Get.to(() => const DashboardScreen());
     } catch (e) {
-      MyHelperFunctions.showSnackBar(MyTexts.createAccountError);
+      MyHelperFunctions.showSnackBar(MyTexts.createAccountError, 'Red');
     }
   }
 }
