@@ -28,4 +28,28 @@ export default class ServiceUser {
 
     return users
   }
+
+  async get(payloadAccessToken: PayloadAcessToken, userId: number) {
+    const user = await this.prismaClient.user.findUnique({
+      where: {
+        id: userId,
+        companyId: payloadAccessToken.companyId,
+        deleted: false
+      },
+      select: {
+        id: true,
+        name: true,
+        profileTypeName: true,
+        OrderBeingMade: true,
+        OrderCompleted: true,
+        OrderCreated: true,
+        OrderDelivered: true,
+      }
+    });
+
+    if (user === null)
+      throw "Usuario não econtrado !";
+
+    return user;
+  }
 }
