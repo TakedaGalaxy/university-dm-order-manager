@@ -110,6 +110,33 @@ export default class ServiceOrder {
 
     return generateMessage("Sucesso", "Pedido alterado com sucesso !");
   }
+
+  async cancel(payloadAccessToken: PayloadAcessToken, id: number) {
+    const order = await this.prismaClient.order.findUnique({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId
+      }
+    });
+
+    if (order === null)
+      throw "Pedido não encontrado !";
+
+    if (order.cancelled)
+      throw "Pedido já cancelado !";
+
+    await this.prismaClient.order.update({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId,
+        cancelled: false
+      }, data: {
+        cancelled: true
+      }
+    })
+
+    return generateMessage("Sucesso", "Pedido cancelado !");
+  }
 }
 
 export type BodyCreateServiceOrder = {
