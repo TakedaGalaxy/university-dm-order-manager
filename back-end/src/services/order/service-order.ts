@@ -76,9 +76,48 @@ export default class ServiceOrder {
 
     return order;
   }
+
+  async update(payloadAccessToken: PayloadAcessToken, id: number, body: BodyCreateServiceOrder) {
+    const order = await this.prismaClient.order.findUnique({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId
+      }
+    })
+
+    if (order === null)
+      throw "Pedido não encontrado !";
+
+    if (order.createdByUserId !== payloadAccessToken.userId)
+      throw "Não pode alterar pedido feito por outro funcionario !";
+
+    if (order.cancelled)
+      throw "Não pode alterar pedido cancelado";
+
+    if (order.completedAt !== null)
+      throw "Não pode alterar pedido completo";
+
+    await this.prismaClient.order.update({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId,
+        cancelled: false
+      }, data: {
+        table: body.table,
+        description: body.description
+      }
+    });
+
+    return generateMessage("Sucesso", "Pedido alterado com sucesso !");
+  }
 }
 
 export type BodyCreateServiceOrder = {
+  table: string,
+  description: string
+}
+
+export type BodyUpdateServiceOrder = {
   table: string,
   description: string
 }

@@ -3,7 +3,7 @@ import { Router } from "express";
 import Security from "../../utils/security/security";
 import { middlewareAuth } from "../../middleware/auth/auth";
 import middlewareBodyVerify from "../../middleware/body-verify/body-verify";
-import ServiceOrder, { BodyCreateServiceOrder } from "../../services/order/service-order";
+import ServiceOrder, { BodyCreateServiceOrder, BodyUpdateServiceOrder } from "../../services/order/service-order";
 
 export default function routerOrder(prismaClient: PrismaClient, security: Security): Router {
   const router = Router();
@@ -46,6 +46,21 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
 
       try {
         response.status(200).json(await serviceOrder.getById(payloadAccessToken!, Number(params.id)));
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ message: "Error", description: `${error}` });
+      }
+    }
+  );
+
+  router.post("/:id",
+    middlewareAuth(prismaClient, security, ["waiter"]),
+    middlewareBodyVerify<BodyUpdateServiceOrder>(["table", "description"]),
+    async (request, response) => {
+      const { payloadAccessToken, params, body } = request;
+
+      try {
+        response.status(200).json(await serviceOrder.update(payloadAccessToken!, Number(params.id), body));
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
