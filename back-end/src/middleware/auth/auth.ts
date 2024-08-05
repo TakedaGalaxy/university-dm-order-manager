@@ -39,6 +39,22 @@ export function middlewareAuth(prismaClient: PrismaClient, security: Security, p
       return;
     }
 
+    if (profileType !== undefined) {
+      let find = false;
+
+      for (let i = 0; i < profileType.length; i++) {
+        if (ProfileType[profileType[i]] === user.profileTypeName) {
+          find = true;
+          break;
+        }
+      }
+
+      if (!find) {
+        response.status(500).json(generateMessage("Não autorizado", "Usuario não tem acesso !"));
+        return;
+      }
+    }
+
     request.payloadAccessToken = payload;
     next();
   };
