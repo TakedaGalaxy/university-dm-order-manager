@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  User  User[]
+  Order Order[]
+}
+
+model ProfileType {
+  name String @id
+  User User[]
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  name            String
+  password        String
+  activeTokenId   String?
+  deleted         Boolean     @default(false)
+  company         Company     @relation(fields: [companyId], references: [id])
+  companyId       Int
+  profileType     ProfileType @relation(fields: [profileTypeName], references: [name])
+  profileTypeName String
+  OrderCreated    Order[]     @relation("OrderCreatedBy")
+  OrderBeingMade  Order[]     @relation("OrderBeingMadeBy")
+  OrderCompleted  Order[]     @relation("OrderCompletedBy")
+  OrderDelivered  Order[]     @relation("OrderDeliveredBy")
+
+  @@unique([name, companyId])
+}
+
+model Order {
+  id                Int      @id @default(autoincrement())
+  table             String
+  description       String
+  cancelled         Boolean @default(false)
+  company           Company  @relation(fields: [companyId], references: [id])
+  companyId         Int
+  createdByUser     User     @relation("OrderCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt         DateTime @default(now())
+  createdByUserId   Int
+  beingMadeByUser   User?    @relation("OrderBeingMadeBy", fields: [beingMadeByUserId], references: [id])
+  beingMandeAt      DateTime?
+  beingMadeByUserId Int?
+  completedByUser   User?    @relation("OrderCompletedBy", fields: [completedByUserId], references: [id])
+  completedByUserId Int?
+  completedAt       DateTime?
+  deliveredByUser   User?    @relation("OrderDeliveredBy", fields: [deliveredByUserId], references: [id])
+  deliveredByUserId Int?
+  deliveredAt       DateTime?
+}
