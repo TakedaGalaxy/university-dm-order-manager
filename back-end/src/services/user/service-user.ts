@@ -89,6 +89,10 @@ export default class ServiceUser {
   async update(payloadAccessToken: PayloadAcessToken, userId: number, body: BodyCreateServiceUser, security: Security): Promise<DataMessage> {
     const { name, password, profileTypeName } = body;
 
+    if (payloadAccessToken.userId === userId)
+      throw "Não pode alterar proprios dados !";
+
+
     if (await this.prismaClient.profileType.findUnique({
       where: {
         name: profileTypeName

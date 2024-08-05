@@ -24,7 +24,8 @@ export function middlewareAuth(prismaClient: PrismaClient, security: Security, p
 
     const user = await prismaClient.user.findUnique({
       where: {
-        id: payload.userId
+        id: payload.userId,
+        deleted: false
       }
     });
 
