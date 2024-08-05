@@ -99,6 +99,33 @@ export default class ServiceAuth {
 
     return generateMessage("Sucesso", "Usuario deslogado !");
   }
+
+
+  async getAccount(payloadAccessToken: PayloadAcessToken): Promise<ResponseGetAccountServiceAuth> {
+    const company = await this.prismaClient.company.findUnique({
+      where: {
+        id: payloadAccessToken.companyId
+      }
+    });
+
+    if (company === null)
+      throw "Empresa não encontrada !";
+
+    const user = await this.prismaClient.user.findUnique({
+      where: {
+        id: payloadAccessToken.userId
+      }
+    });
+
+    if (user === null)
+      throw "Usuario não encontrado !";
+
+    return {
+      userName: user.name,
+      profileType: user.profileTypeName,
+      companyName: company.name
+    }
+  }
 }
 
 export type BodySignInServiceAuth = {
@@ -115,4 +142,10 @@ export type BodyLogInServiceAuth = {
 
 export type ResponseLogInServiceAuth = {
   accessToken: string,
+}
+
+export type ResponseGetAccountServiceAuth = {
+  userName: string,
+  companyName: string,
+  profileType: string,
 }

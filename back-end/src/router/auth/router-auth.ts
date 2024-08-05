@@ -52,5 +52,19 @@ export default function routerAuth(prismaClient: PrismaClient, security: Securit
       }
     });
 
+  router.get("/account",
+    middlewareAuth(prismaClient, security),
+    async (request, response) => {
+      const { payloadAccessToken } = request;
+
+      try {
+        response.status(200).json(await serviceAuth.getAccount(payloadAccessToken!));
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ message: "Error", description: `${error}` });
+        return;;
+      }
+    });
+
   return router;
 }

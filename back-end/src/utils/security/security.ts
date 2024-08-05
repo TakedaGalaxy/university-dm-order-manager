@@ -35,7 +35,6 @@ export default class Security {
   }
 
   generateAccessToken(userId: number, companyId: number): { accessToken: string, tokenId: string } {
-    // Dados do usuário (payload) que serão incorporados no token
     const tokenId = `${userId}:${new Date().getTime()}`;
 
     const payload: PayloadAcessToken = {
