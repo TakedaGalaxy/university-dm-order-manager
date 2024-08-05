@@ -1,5 +1,4 @@
 import crypto from "crypto"
-import jwt from "jsonwebtoken"
 
 export default class Security {
   private readonly key: Buffer
@@ -33,44 +32,4 @@ export default class Security {
 
     return decrypted.toString();
   }
-
-  generateAccessToken(userId: number, companyId: number): { accessToken: string, tokenId: string } {
-    // Dados do usuário (payload) que serão incorporados no token
-    const tokenId = `${userId}:${new Date().getTime()}`;
-
-    const payload: PayloadAcessToken = {
-      userId,
-      companyId,
-      tokenId
-    };
-
-    const options = {
-      expiresIn: '8h'
-    };
-
-    const accessToken = jwt.sign(payload, this.key, options);
-
-    return {
-      accessToken, tokenId
-    }
-  }
-
-  verifyToken(token: string): PayloadAcessToken {
-    let payload;
-
-    try {
-      payload = jwt.verify(token, this.key);
-    } catch (error) {
-      console.log(error);
-      throw "Token invalido !";
-    }
-
-    return payload as PayloadAcessToken;
-  }
-}
-
-export type PayloadAcessToken = {
-  userId: number,
-  companyId: number,
-  tokenId: string,
 }
