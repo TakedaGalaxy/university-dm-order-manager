@@ -8,4 +8,14 @@ class MyValidator {
     if (value == null || value.isEmpty) return 'Password is required';
     return null;
   }
+
+  static String? validateUserName(String? value) {
+    if (value == null || value.isEmpty) return 'User name is required';
+    return null;
+  }
+
+  static String? validateCompanyName(String? value) {
+    if (value == null || value.isEmpty) return 'Company name is required';
+    return null;
+  }
 }
