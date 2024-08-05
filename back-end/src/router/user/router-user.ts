@@ -68,5 +68,19 @@ export default function routerUser(prismaClient: PrismaClient, security: Securit
     }
   );
 
+  router.delete("/:id",
+    middlewareAuth(prismaClient, security, ["adm"]),
+    async (request, response) => {
+      const { payloadAccessToken, params } = request;
+
+      try {
+        response.status(200).json(await serviceUser.delete(payloadAccessToken!, Number(params.id)));
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ message: "Error", description: `${error}` });
+      }
+    }
+  );
+
   return router;
 }

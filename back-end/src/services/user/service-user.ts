@@ -135,8 +135,34 @@ export default class ServiceUser {
     })
 
     return generateMessage("Sucesso", "Usuario atualizado !");
+  }
+
+  async delete(payloadAccessToken: PayloadAcessToken, userId: number): Promise<DataMessage>{
+    if (payloadAccessToken.userId === userId)
+      throw "Não pode alterar proprios dados !";
 
 
+    if (await this.prismaClient.user.findUnique({
+      where: {
+        id: userId,
+        companyId: payloadAccessToken.companyId,
+        deleted: false
+      }
+    }) === null)
+      throw "Usuario não encontrado!";
+
+    await this.prismaClient.user.update({
+      where: {
+        id: userId,
+        companyId: payloadAccessToken.companyId,
+      },
+      data: {
+        activeTokenId: null,
+        deleted: true
+      }
+    })
+
+    return generateMessage("Sucesso", "Usuario deleteado !");
   }
 }
 
