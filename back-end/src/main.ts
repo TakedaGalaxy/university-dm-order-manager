@@ -3,7 +3,15 @@ import cors from "cors";
 import "dotenv/config";
 import routerAuth from "./router/auth/router-auth";
 import { PrismaClient } from "@prisma/client";
-import Security from "./utils/security/security";
+import Security, { PayloadAcessToken } from "./utils/security/security";
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    payloadAccessToken?: PayloadAcessToken;
+  }
+  interface Response {
+  }
+}
 
 const { ADDRESS, PORT, CRYPTO_KEY } = process.env;
 
