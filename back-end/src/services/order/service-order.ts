@@ -49,6 +49,33 @@ export default class ServiceOrder {
 
     return orders;
   }
+
+  async getById(payloadAccessToken: PayloadAcessToken, id: number) {
+    const { companyId } = payloadAccessToken;
+
+    const order = await this.prismaClient.order.findUnique({
+      where: {
+        id,
+        companyId: companyId,
+      },
+      select: {
+        id: true,
+        table: true,
+        description: true,
+        createdByUser: { select: { name: true } },
+        createdAt: true,
+        beingMadeByUser: { select: { name: true } },
+        beingMandeAt: true,
+        completedByUser: { select: { name: true } },
+        completedAt: true,
+        deliveredByUser: { select: { name: true } },
+        deliveredAt: true,
+        cancelled: true
+      }
+    })
+
+    return order;
+  }
 }
 
 export type BodyCreateServiceOrder = {

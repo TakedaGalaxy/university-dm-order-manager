@@ -39,5 +39,19 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
     }
   );
 
+  router.get("/:id",
+    middlewareAuth(prismaClient, security, ["adm", "waiter", "chef"]),
+    async (request, response) => {
+      const { payloadAccessToken, params } = request;
+
+      try {
+        response.status(200).json(await serviceOrder.getById(payloadAccessToken!, Number(params.id)));
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ message: "Error", description: `${error}` });
+      }
+    }
+  );
+
   return router;
 }
