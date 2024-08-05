@@ -50,6 +50,9 @@ export default class ServiceAuth {
       }
     });
 
+    const res = await this.prismaClient.company.findMany();
+    console.log(res);
+
     if (company === null) throw "Empresa não encontrada !";
 
     const user = await this.prismaClient.user.findUnique({

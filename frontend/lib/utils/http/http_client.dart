@@ -23,8 +23,12 @@ class MyHttpHelper {
   }
 
   static Future<Map<String, dynamic>> delete(
-      String endpoint, dynamic data) async {
-    final response = await http.delete(Uri.parse('$_baseUrl/$endpoint'));
+      String endpoint, String token) async {
+    Map<String, String> header = {'authorization': token};
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/$endpoint'),
+      headers: header
+    );
     return _handleResponse(response);
   }
 

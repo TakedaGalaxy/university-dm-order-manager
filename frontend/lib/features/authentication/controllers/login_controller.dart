@@ -6,7 +6,7 @@ import 'package:frontend/utils/helpers/helper_functions.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-class RegisterController extends GetxController {
+class LoginController extends GetxController {
   final hidePassword = true.obs;
 
   final localStorage = GetStorage();
@@ -15,17 +15,20 @@ class RegisterController extends GetxController {
   final userPassword = TextEditingController();
   final companyName = TextEditingController();
 
-  GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
 
-  Future signUp() async {
+  Future redirect() async {
+    final toGoDash = await AuthenticationRepository().isLoged();
+    if (toGoDash) Get.to(() => const DashboardScreen());
+  }
+
+  Future signIn() async {
     try {
       // Ideia: Verificar conexão com a internet
-      if (!registerFormKey.currentState!.validate()) {
-        return const SnackBar(content: Text(MyTexts.createAccountError));
+      if (!loginFormKey.currentState!.validate()) {
+        return const SnackBar(content: Text(MyTexts.loginError));
       }
 
-      await AuthenticationRepository()
-          .signUp(userName.text, userPassword.text, companyName.text);
       await AuthenticationRepository()
           .signIn(userName.text, userPassword.text, companyName.text);
 
@@ -35,7 +38,7 @@ class RegisterController extends GetxController {
 
       Get.to(() => const DashboardScreen());
     } catch (e) {
-      MyHelperFunctions.showSnackBar(MyTexts.createAccountError);
+      MyHelperFunctions.showSnackBar(MyTexts.loginError);
     }
   }
 }

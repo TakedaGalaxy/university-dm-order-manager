@@ -28,5 +28,6 @@ class MyTexts {
 
   static const String back = "Voltar";
 
+  static const String loginError = "Usuário ou senha incorretos. Por favor, tente novamente";
   static const String createAccountError = "Houve um erro ao criar o usuário";
 }
