@@ -44,19 +44,19 @@ model Order {
   id                Int      @id @default(autoincrement())
   table             String
   description       String
-  cancelled         Boolean
+  cancelled         Boolean @default(false)
   company           Company  @relation(fields: [companyId], references: [id])
   companyId         Int
   createdByUser     User     @relation("OrderCreatedBy", fields: [createdByUserId], references: [id])
-  crearedAt         DateTime
+  crearedAt         DateTime @default(now())
   createdByUserId   Int
   beingMadeByUser   User?    @relation("OrderBeingMadeBy", fields: [beingMadeByUserId], references: [id])
-  beingMandeAt      DateTime
+  beingMandeAt      DateTime?
   beingMadeByUserId Int?
   completedByUser   User?    @relation("OrderCompletedBy", fields: [completedByUserId], references: [id])
   completedByUserId Int?
-  completedAt       DateTime
+  completedAt       DateTime?
   deliveredByUser   User?    @relation("OrderDeliveredBy", fields: [deliveredByUserId], references: [id])
   deliveredByUserId Int?
-  deliveredAt       DateTime
+  deliveredAt       DateTime?
 }
