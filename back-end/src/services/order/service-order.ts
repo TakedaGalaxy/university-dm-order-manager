@@ -137,6 +137,40 @@ export default class ServiceOrder {
 
     return generateMessage("Sucesso", "Pedido cancelado !");
   }
+
+  async setDelivered(payloadAccessToken: PayloadAcessToken, id: number) {
+    const order = await this.prismaClient.order.findUnique({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId
+      }
+    });
+
+    if (order === null)
+      throw "Pedido não encontrado !";
+
+    if (order.cancelled)
+      throw "Pedido cancelado !";
+
+    if (order.completedAt === null)
+      throw "Pedido não foi completo !";
+
+    if (order.deliveredAt !== null)
+      throw "Pedido já entregue !";
+
+    await this.prismaClient.order.update({
+      where: {
+        id,
+        companyId: payloadAccessToken.companyId
+      },
+      data: {
+        deliveredByUserId: payloadAccessToken.userId,
+        deliveredAt: new Date()
+      }
+    });
+
+    return generateMessage("Sucesso", "Pedido marcado como entregue !");
+  }
 }
 
 export type BodyCreateServiceOrder = {
