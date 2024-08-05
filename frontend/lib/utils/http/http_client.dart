@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MyHttpHelper {
-  static const String _baseUrl = 'http://localhost:3333';
+  static const String _baseUrl = 'http://127.0.0.1:4000';
 
   static Future<Map<String, dynamic>> get(String endpoint) async {
     final response = await http.get(Uri.parse('$_baseUrl/$endpoint'));

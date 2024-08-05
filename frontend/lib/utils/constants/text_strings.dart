@@ -27,4 +27,6 @@ class MyTexts {
   static const String createAccount = "Registrar";
 
   static const String back = "Voltar";
+
+  static const String createAccountError = "Houve um erro ao criar o usuário";
 }
