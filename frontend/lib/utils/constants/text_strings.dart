@@ -36,4 +36,7 @@ class MyTexts {
   static const String createOrderError = "Houve um erro ao criar o pedido";
 
   static const String createOrder = "Criar Pedido";
+  static const String markAsDelivered = "Marcar como entregue";
+  static const String markAsProducing = "Marcar como em produção";
+  static const String markAsComplete = "Marcar como completo";
 }

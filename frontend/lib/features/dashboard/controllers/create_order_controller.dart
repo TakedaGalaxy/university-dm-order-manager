@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/authentication/repositories/auth_repository.dart';
 import 'package:frontend/features/dashboard/screens/dashboard_screen.dart';
@@ -9,8 +11,16 @@ import 'package:get/get.dart';
 class CreateOrderController extends GetxController {
   final description = TextEditingController();
   final table = TextEditingController();
+  final orders = [].obs;
+  final p1 = false.obs;
+  final p2 = false.obs;
 
   GlobalKey<FormState> createOrderFormKey = GlobalKey<FormState>();
+
+  Future getPermissions () async {
+    p1.value = await canDeleteAndDeliveredAndCancelAndEditAndExclude();
+    p2.value = await completeAndProducing();
+  }
 
   Future redirect() async {
     final toGoDash = await AuthenticationRepository().isLoged();
@@ -24,7 +34,7 @@ class CreateOrderController extends GetxController {
       }
 
       await OrderRepository().createOrder(description.text, table.text);
-      await OrderRepository().getOrders();
+      await getOrders();
 
       description.text = '';
       table.text = '';
@@ -33,5 +43,37 @@ class CreateOrderController extends GetxController {
     } catch (e) {
       MyHelperFunctions.showSnackBar(MyTexts.createOrderError, 'Red');
     }
+  }
+
+  Future getOrders() async {
+    orders.value = await OrderRepository().getOrders();
+  }
+
+  Future cancelOrder(String id) async {
+    await OrderRepository().cancelOrder(id);
+    await getOrders();
+  }
+
+  Future deliveredOrder(String id) async {
+    await OrderRepository().deliveredOrder(id);
+    await getOrders();
+  }
+
+  Future producingOrder(String id) async {
+    await OrderRepository().producingOrder(id);
+    await getOrders();
+  }
+
+  Future completeOrder(String id) async {
+    await OrderRepository().completeOrder(id);
+    await getOrders();
+  }
+
+  Future canDeleteAndDeliveredAndCancelAndEditAndExclude() async {
+    return await OrderRepository().canDeleteAndDeliveredAndCancelAndEditAndExclude();
+  }
+
+  Future completeAndProducing() async {
+    return await OrderRepository().completeAndProducing();
   }
 }

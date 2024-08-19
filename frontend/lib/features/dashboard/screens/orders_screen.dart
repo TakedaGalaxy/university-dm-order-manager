@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/dashboard/screens/create_order_screen.dart';
+import 'package:frontend/features/dashboard/controllers/create_order_controller.dart';
 import 'package:frontend/utils/constants/colors.dart';
 import 'package:frontend/utils/constants/sizes.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
@@ -16,56 +16,170 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(CreateOrderController());
+    controller.getOrders();
+
     return Scaffold(
         body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const HomeHeader(),
-            Padding(
-              padding: const EdgeInsets.all(MySizes.defaultSpace),
-              child: Column(
-                children: [
-                  const SizedBox(height: MySizes.spaceBtwItems),
-                  Card(
-                    color: MyColors.white,
-                    child: Container(
-                      padding: const EdgeInsets.all(MySizes.defaultSpace),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Pedido',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: MySizes.spaceBtwItems),
-                          Row(
-                            children: [
-                              const Icon(Iconsax.location, color: MyColors.darkGrey, size: MySizes.iconSm),
-                              const SizedBox(width: MySizes.spaceBtwItems),
-                              Text('Mesa 1', style: Theme.of(context).textTheme.bodyLarge),
-                            ],
-                          ),
-                          const SizedBox(height: MySizes.spaceBtwItems),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              IconButton(onPressed: () {}, icon: const Icon(Iconsax.edit, size: 24)),
-                              IconButton(onPressed: () {}, icon: const Icon(Iconsax.close_circle, size: 24)),
-                              IconButton(onPressed: () {}, icon: const Icon(Iconsax.edit, size: 24)),
-                            ],
-                          ),
-                        ]
-                      ),
-                    )
-                  ),
-                ]
-              ),
-            ),
+      child: Column(
+        children: [
+          const HomeHeader(),
+          Padding(
+            padding: const EdgeInsets.all(MySizes.defaultSpace),
+            child: Column(children: [
+              const SizedBox(height: MySizes.spaceBtwItems),
+              Obx(() => Column(
+                    children: controller.orders.map((order) {
+                      return OrderCard(
+                          description: order['description'],
+                          table: order['table'],
+                          canceled: order['cancelled'] ?? false,
+                          delivered: order['deliveredAt'],
+                          completed: order['completedAt'],
+                          beingMande: order['beingMandeAt'],
+                          id: order['id']);
+                    }).toList(),
+                  )),
+            ]),
+          ),
         ],
       ),
     ));
+  }
+}
+
+class OrderCard extends StatelessWidget {
+  const OrderCard({
+    super.key,
+    this.description = 'Heineken Long neck',
+    this.table = '01',
+    this.canceled = false, 
+    this.delivered, 
+    this.completed, 
+    this.beingMande,
+    required this.id,
+  });
+
+  final int id;
+
+  final String description;
+  final String table;
+
+  final bool canceled;
+  final String? delivered;
+  final String? completed;
+  final String? beingMande;
+
+  getSatus() {
+    if (canceled) {
+      return 'Cancelado';
+    } else if(delivered != null) {
+      return 'Pedido entregue';
+    } else if (completed != null) {
+      return 'Pedido concluído';
+    } else if (beingMande != null) {
+      return 'Pedido sendo feito';
+    } else {
+      return 'Pedido informado';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(CreateOrderController());
+    controller.getPermissions();
+
+    return Card(
+        color: MyColors.white,
+        child: Container(
+          padding: const EdgeInsets.all(MySizes.defaultSpace),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: MySizes.spaceBtwItems),
+                Row(
+                  children: [
+                    const Icon(Iconsax.location,
+                        color: MyColors.darkGrey, size: MySizes.iconSm),
+                    const SizedBox(width: MySizes.spaceBtwItems),
+                    Text('Mesa $table',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                  ],
+                ),
+                const SizedBox(height: MySizes.spaceBtwItems),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // IconButton(
+                    //     onPressed: () {},
+                    //     icon: const Icon(Iconsax.edit, size: 24)),
+                    Obx(() => controller.p1.value && !canceled ? 
+                      IconButton(
+                            onPressed: () => controller.cancelOrder(id.toString()),
+                            icon: const Icon(
+                              Iconsax.trash,
+                              size: 24,
+                              color: MyColors.error,
+                            )) :
+                      Container()
+                    ),
+                  ],
+                ),
+                const SizedBox(height: MySizes.spaceBtwItems),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(getSatus(),
+                        style: TextStyle(
+                            color:
+                                canceled ? MyColors.error : getSatus() != 'Pedido entregue' ? MyColors.primary : MyColors.success)),
+                  ],
+                ),
+                const SizedBox(height: MySizes.spaceBtwItems),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Obx(() => controller.p1.value && !canceled ? 
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(onPressed: () => controller.deliveredOrder(id.toString()), child: const Text(MyTexts.markAsDelivered))
+                      ) :
+                      Container()
+                    ),
+                    Obx(() => controller.p2.value && !canceled ? 
+                      const SizedBox(height: MySizes.spaceBtwItems)
+                      : Container()
+                    ),
+                    Obx(() => controller.p2.value && !canceled ? 
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(onPressed: () => controller.producingOrder(id.toString()), child: const Text(MyTexts.markAsProducing))
+                      ) :
+                      Container()
+                    ),
+                    Obx(() => controller.p2.value && !canceled ? 
+                      const SizedBox(height: MySizes.spaceBtwItems)
+                      : Container()
+                    ),
+                    Obx(() => controller.p2.value && !canceled ? 
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(onPressed: () => controller.completeOrder(id.toString()), child: const Text(MyTexts.markAsComplete))
+                      ) :
+                      Container()
+                    ),
+                  ],
+                ),
+              ]),
+        ));
   }
 }
 
