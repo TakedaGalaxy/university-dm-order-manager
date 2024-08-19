@@ -25,6 +25,12 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
     {'display': 'Garçom', 'value': 'WAITER'},
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    nameController.text = widget.employee['name'];
+    _selectedRole = widget.employee['profileTypeName'];
+  }
 
   @override
   Widget build(BuildContext context) {

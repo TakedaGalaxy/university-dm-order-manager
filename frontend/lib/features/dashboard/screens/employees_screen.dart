@@ -18,7 +18,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   void initState() {
     super.initState();
     print('Inicializando EmployeesScreen'); // Adicionar log para depuração
-    _employeesFuture = _userController.getAllEmployees();
+    _userController.updateEmployeesStream();
   }
 
   String getProfileTypeName(String profileTypeName) {
@@ -34,12 +34,38 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     }
   }
 
+  void _showDeleteConfirmationDialog(int employeeId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content: const Text('Você realmente deseja deletar este usuário?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Não'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Sim'),
+              onPressed: () {
+                _userController.deleteEmployee(employeeId);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _employeesFuture,
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: _userController.employeesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -49,7 +75,6 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             return const Center(child: Text('No employees found'));
           } else {
             final employees = snapshot.data!;
-            print('Funcionários exibidos na tela: $employees'); // Adicionar log para depuração
             return ListView.separated(
               itemCount: employees.length,
               itemBuilder: (context, index) {
@@ -57,16 +82,27 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 return ListTile(
                   title: Text('Nome: ${employee['name']}'),
                   subtitle: Text('Função: ${getProfileTypeName(employee['profileTypeName'])}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UpdateEmployeeForm(employee: employee),
-                        ),
-                      );
-                    },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.white),
+                          onPressed: () {
+                            _showDeleteConfirmationDialog(employee['id']);
+                          }
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UpdateEmployeeForm(employee: employee),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 );
               },

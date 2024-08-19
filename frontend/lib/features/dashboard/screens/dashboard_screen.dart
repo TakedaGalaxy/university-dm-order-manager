@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/dashboard/screens/create_order_screen.dart';
+import 'package:frontend/common/styles/spacing_styles.dart';
+import 'package:frontend/features/dashboard/screens/Forms/create_order.dart';
+import 'package:frontend/features/dashboard/screens/me_screen.dart';
 import 'package:frontend/features/dashboard/screens/widgets/logout_button.dart';
 import 'package:frontend/utils/constants/colors.dart';
 import 'package:frontend/utils/constants/sizes.dart';
@@ -23,10 +25,11 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
   bool isAdmin = false;
+  bool canMakeOrder = false;
 
   static List<Widget> _widgetOptions = <Widget>[
     OrdersScreen(),
-    EmployeesScreen(),
+    MeScreen()
   ];
 
 
@@ -34,6 +37,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _checkAdminStatus();
+    _orderCanBeMade();
+  }
+
+  Future<void> _orderCanBeMade() async {
+    try {
+      String userRole = await AuthenticationRepository.instance.getProfile();
+      bool orderStatus = false;
+      if(userRole == 'ADM' || userRole == 'WAITER'){
+        orderStatus = true;
+      }
+
+      setState(() {
+        canMakeOrder = orderStatus;
+      });
+    } catch(e){
+      print('Error in orderStatus: $e');
+    }
   }
 
   Future<void> _checkAdminStatus() async {
@@ -41,6 +61,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bool adminStatus = await AuthenticationRepository.instance.isAdmin();
       setState(() {
         isAdmin = adminStatus;
+        print('Admin: $isAdmin');
+        if(isAdmin){
+          _widgetOptions.insert(1, EmployeesScreen());
+        }
       });
     } catch(e){
       print('Error in adminStatus: $e');
@@ -54,13 +78,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onFabPressed(){
-    if(_selectedIndex ==0){
+    if(_selectedIndex ==0 && canMakeOrder){
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
       );
     }
-    else if(_selectedIndex ==1){
+    else if(_selectedIndex ==1 && isAdmin){
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const CreateEmployeeForm()),
@@ -115,25 +139,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      floatingActionButton: isAdmin? FloatingActionButton(
+      floatingActionButton: (isAdmin && _selectedIndex < 2|| canMakeOrder  && _selectedIndex < 1)  ? FloatingActionButton(
         onPressed: _onFabPressed,
         child: const Icon(Icons.add),
       ) : null,
-      bottomNavigationBar: isAdmin? BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+      bottomNavigationBar:BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Pedidos',
           ),
-          BottomNavigationBarItem(
+          if(isAdmin)
+          const BottomNavigationBarItem(
             icon: Icon(Icons.people),
             label: 'Funcionários',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).primaryColor,
         onTap: _onItemTapped,
-      ) : null,
+      ),
     );
   }
 }

@@ -8,9 +8,19 @@ class MyHttpHelper {
     final response = await http.get(Uri.parse('$_baseUrl/$endpoint'));
     return _handleResponse(response);
   }
-
-  static Future<http.Response> getAuthorized(
-      String endpoint, String token) async {
+  static Future<http.Response> getAccount(String token) async {
+    final response = await http.get(Uri.parse('$_baseUrl/auth/account'),
+        headers: {'authorization': token}
+    );
+    return response;
+  }
+  static Future<http.Response> getAuthorized(String endpoint, String token) async {
+    final response = await http.get(Uri.parse('$_baseUrl/$endpoint'),
+        headers: {'authorization': token}
+    );
+    return response;
+  }
+  static Future<http.Response> getAuthorized(String endpoint, String token) async {
     final response = await http.get(Uri.parse('$_baseUrl/$endpoint'),
         headers: {'authorization': token});
     return response;
@@ -68,6 +78,16 @@ class MyHttpHelper {
   static Future<Map<String, dynamic>> put(String endpoint, dynamic data) async {
     final response = await http.put(Uri.parse('$_baseUrl/$endpoint'),
         headers: {'Content-Type': 'application/json'}, body: json.encode(data));
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> putAuthorized(String endpoint, dynamic data, String Token) async {
+    final response = await http.put(Uri.parse('$_baseUrl/$endpoint'),
+        headers:
+        { 'authorization': Token,
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(data));
     return _handleResponse(response);
   }
 
