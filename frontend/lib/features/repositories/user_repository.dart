@@ -26,7 +26,7 @@ class UserRepository extends GetxController{
 
   Future<void> updateEmployee(int id, String userName, String userPassword, String profileTypeName) async {
     final tk = await MyLocalStorage().readData('@rs:progapp_tk');
-    print('Username: $userName, Password: $userPassword, ProfileTypeName: $profileTypeName');
+    print('Id: $id, Username: $userName, Password: $userPassword, ProfileTypeName: $profileTypeName');
 
     Map<String, dynamic> body = {
       'name': userName,
@@ -34,7 +34,19 @@ class UserRepository extends GetxController{
       'profileTypeName': profileTypeName
     };
 
-    await MyHttpHelper.postAuthorized('user/$id', body, tk);
+    await MyHttpHelper.putAuthorized('user/$id', body, tk);
+  }
+
+  Future<Map<String, dynamic>> getEmployee(int id) async {
+    final tk = await MyLocalStorage().readData('@rs:progapp_tk');
+    final response = await MyHttpHelper.getAuthorized('user/$id', tk);
+    return json.decode(response.body);
+  }
+
+  Future<dynamic> getLoggedEmployee() async {
+    final tk = await MyLocalStorage().readData('@rs:progapp_tk');
+    final response = await MyHttpHelper.getAuthorized('auth/account', tk);
+    return json.decode(response.body);
   }
 
   Future<List<Map<String, dynamic>>> getAllEmployees() async {
@@ -49,6 +61,11 @@ class UserRepository extends GetxController{
       'profileTypeName': e['profileTypeName']
     }).toList();
     return employees;
+  }
+
+  Future<void> deleteEmployee(int id) async {
+    final tk = await MyLocalStorage().readData('@rs:progapp_tk');
+    await MyHttpHelper.delete('user/$id', tk);
   }
 
 }

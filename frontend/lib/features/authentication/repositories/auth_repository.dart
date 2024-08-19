@@ -63,14 +63,10 @@ class AuthenticationRepository extends GetxController {
         throw Exception('Token not found');
       }
 
-      final decodedToken = JwtDecoder.decode(token);
-      final userId = decodedToken['userId'];
-
-      final response = await MyHttpHelper.getAuthorized('user/$userId', token);
-
+      final response = await MyHttpHelper.getAuthorized('auth/account', token);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['profileTypeName'] == 'ADM';
+        return data['profileType'] == 'ADM';
       } else {
         throw Exception('Failed to load user data');
       }
@@ -80,5 +76,25 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
+  Future<String> getProfile() async {
+    try {
+      final token = await MyLocalStorage().readData('@rs:progapp_tk');
+      if (token == null) {
+        throw Exception('Token not found');
+      }
+
+      final response = await MyHttpHelper.getAuthorized('auth/account', token);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(data['profileType']);
+        return data['profileType'];
+      } else {
+        throw Exception('Failed to load user data');
+      }
+    } catch (e){
+      print('Error in getProfile: $e');
+      return 'USER';
+    }
+  }
 
 }
