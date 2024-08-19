@@ -1,6 +1,15 @@
-import { PrismaClient } from "@prisma/client";
+import { Order, PrismaClient, User } from "@prisma/client";
 import Security, { PayloadAcessToken } from "../../utils/security/security";
 import { DataMessage, generateMessage } from "../../utils/message/message";
+
+export type TypeOrder =
+  Omit<Order, "beingMadeByUserId" | "createdByUserId" | "completedByUserId" | "deliveredByUserId"> &
+  {
+    beingMadeByUser: Pick<User, "id" | "name"> | null
+    createdByUser: Pick<User, "id" | "name"> | null
+    completedByUser: Pick<User, "id" | "name"> | null
+    deliveredByUser: Pick<User, "id" | "name"> | null
+  }
 
 export default class ServiceOrder {
   prismaClient: PrismaClient;
@@ -12,16 +21,31 @@ export default class ServiceOrder {
   async create(payloadAccessToken: PayloadAcessToken, body: BodyCreateServiceOrder) {
     const { table, description } = body;
 
-    await this.prismaClient.order.create({
+    const order = await this.prismaClient.order.create({
       data: {
         table,
         description,
         createdByUserId: payloadAccessToken.userId,
         companyId: payloadAccessToken.companyId
+      },
+      select: {
+        id: true,
+        table: true,
+        description: true,
+        companyId: true,
+        createdByUser: { select: { id: true, name: true } },
+        createdAt: true,
+        beingMadeByUser: { select: { id: true, name: true } },
+        beingMandeAt: true,
+        completedByUser: { select: { id: true, name: true } },
+        completedAt: true,
+        deliveredByUser: { select: { id: true, name: true } },
+        deliveredAt: true,
+        cancelled: true
       }
     })
 
-    return generateMessage("Sucesso", "Pedido criado com sucesso !");
+    return { message: generateMessage("Sucesso", "Pedido criado com sucesso !"), order };
   }
 
   async getAll(payloadAccessToken: PayloadAcessToken) {
@@ -35,13 +59,13 @@ export default class ServiceOrder {
         id: true,
         table: true,
         description: true,
-        createdByUser: { select: { name: true } },
+        createdByUser: { select: { id: true, name: true } },
         createdAt: true,
-        beingMadeByUser: { select: { name: true } },
+        beingMadeByUser: { select: { id: true, name: true } },
         beingMandeAt: true,
-        completedByUser: { select: { name: true } },
+        completedByUser: { select: { id: true, name: true } },
         completedAt: true,
-        deliveredByUser: { select: { name: true } },
+        deliveredByUser: { select: { id: true, name: true } },
         deliveredAt: true,
         cancelled: true
       }
@@ -50,7 +74,7 @@ export default class ServiceOrder {
     return orders;
   }
 
-  async getById(payloadAccessToken: PayloadAcessToken, id: number) {
+  async getById(payloadAccessToken: PayloadAcessToken, id: number): Promise<TypeOrder> {
     const { companyId } = payloadAccessToken;
 
     const order = await this.prismaClient.order.findUnique({
@@ -61,18 +85,22 @@ export default class ServiceOrder {
       select: {
         id: true,
         table: true,
+        companyId: true,
         description: true,
-        createdByUser: { select: { name: true } },
+        createdByUser: { select: { id: true, name: true } },
         createdAt: true,
-        beingMadeByUser: { select: { name: true } },
+        beingMadeByUser: { select: { id: true, name: true } },
         beingMandeAt: true,
-        completedByUser: { select: { name: true } },
+        completedByUser: { select: { id: true, name: true } },
         completedAt: true,
-        deliveredByUser: { select: { name: true } },
+        deliveredByUser: { select: { id: true, name: true } },
         deliveredAt: true,
         cancelled: true
       }
     })
+
+    if (order === null)
+      throw "Pedido não encontrado !";
 
     return order;
   }
@@ -124,7 +152,7 @@ export default class ServiceOrder {
 
     if (order.cancelled)
       throw "Pedido já cancelado !";
-    
+
     if (order.deliveredAt !== null)
       throw "Pedido já entregue, não  pode ser cancelado!";
 

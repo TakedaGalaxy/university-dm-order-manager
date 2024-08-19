@@ -53,7 +53,7 @@ export default function routerUser(prismaClient: PrismaClient, security: Securit
     }
   );
 
-  router.post("/:id",
+  router.put("/:id",
     middlewareAuth(prismaClient, security, ["adm"]),
     middlewareBodyVerify<BodyUpdateServiceUser>(["name", "password", "profileTypeName"]),
     async (request, response) => {

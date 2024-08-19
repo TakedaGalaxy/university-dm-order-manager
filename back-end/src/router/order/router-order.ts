@@ -4,8 +4,13 @@ import Security from "../../utils/security/security";
 import { middlewareAuth } from "../../middleware/auth/auth";
 import middlewareBodyVerify from "../../middleware/body-verify/body-verify";
 import ServiceOrder, { BodyCreateServiceOrder, BodyUpdateServiceOrder } from "../../services/order/service-order";
+import ServiceWebsocketOrder from "../../services/websocket-order/service-websocket-order";
 
-export default function routerOrder(prismaClient: PrismaClient, security: Security): Router {
+export default function routerOrder(
+  prismaClient: PrismaClient,
+  security: Security,
+  serviceWebsocketOrder: ServiceWebsocketOrder
+): Router {
   const router = Router();
 
   const serviceOrder = new ServiceOrder(prismaClient);
@@ -17,7 +22,9 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
       const { payloadAccessToken, body } = request;
 
       try {
-        response.status(200).json(await serviceOrder.create(payloadAccessToken!, body));
+        const { message, order } = await serviceOrder.create(payloadAccessToken!, body);
+        response.status(200).json(message);
+        serviceWebsocketOrder.broadcastUpdateOrder(order);
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
@@ -53,7 +60,7 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
     }
   );
 
-  router.post("/:id",
+  router.put("/:id",
     middlewareAuth(prismaClient, security, ["waiter"]),
     middlewareBodyVerify<BodyUpdateServiceOrder>(["table", "description"]),
     async (request, response) => {
@@ -61,6 +68,10 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
 
       try {
         response.status(200).json(await serviceOrder.update(payloadAccessToken!, Number(params.id), body));
+
+        serviceWebsocketOrder.broadcastUpdateOrder(
+          await serviceOrder.getById(payloadAccessToken!, Number(params.id))
+        );
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
@@ -75,6 +86,10 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
 
       try {
         response.status(200).json(await serviceOrder.cancel(payloadAccessToken!, Number(params.id)));
+
+        serviceWebsocketOrder.broadcastUpdateOrder(
+          await serviceOrder.getById(payloadAccessToken!, Number(params.id))
+        );
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
@@ -89,6 +104,10 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
 
       try {
         response.status(200).json(await serviceOrder.setDelivered(payloadAccessToken!, Number(params.id)));
+
+        serviceWebsocketOrder.broadcastUpdateOrder(
+          await serviceOrder.getById(payloadAccessToken!, Number(params.id))
+        );
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
@@ -103,6 +122,10 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
 
       try {
         response.status(200).json(await serviceOrder.setProducing(payloadAccessToken!, Number(params.id)));
+
+        serviceWebsocketOrder.broadcastUpdateOrder(
+          await serviceOrder.getById(payloadAccessToken!, Number(params.id))
+        );
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
@@ -117,6 +140,10 @@ export default function routerOrder(prismaClient: PrismaClient, security: Securi
 
       try {
         response.status(200).json(await serviceOrder.setComplete(payloadAccessToken!, Number(params.id)));
+
+        serviceWebsocketOrder.broadcastUpdateOrder(
+          await serviceOrder.getById(payloadAccessToken!, Number(params.id))
+        );
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
