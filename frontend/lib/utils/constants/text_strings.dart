@@ -22,6 +22,8 @@ class MyTexts {
   static const String username = "Usuário";
   static const String password = "Senha";
   static const String company = "Restaurante";
+  static const String orderDescription = "Descrição do pedido";
+  static const String table = "Mesa";
 
   static const String signIn = "Entrar";
   static const String createAccount = "Registrar";
@@ -30,4 +32,8 @@ class MyTexts {
 
   static const String loginError = "Usuário ou senha incorretos. Por favor, tente novamente";
   static const String createAccountError = "Houve um erro ao criar o usuário";
+
+  static const String createOrderError = "Houve um erro ao criar o pedido";
+
+  static const String createOrder = "Criar Pedido";
 }
