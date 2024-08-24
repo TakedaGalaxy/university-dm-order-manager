@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/styles/spacing_styles.dart';
 import 'package:frontend/features/dashboard/screens/Forms/create_order.dart';
+import 'package:frontend/features/dashboard/screens/create_order_screen.dart';
 import 'package:frontend/features/dashboard/screens/me_screen.dart';
 import 'package:frontend/features/dashboard/screens/widgets/logout_button.dart';
 import 'package:frontend/utils/constants/colors.dart';
@@ -27,9 +28,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isAdmin = false;
   bool canMakeOrder = false;
 
-  static List<Widget> _widgetOptions = <Widget>[
-    OrdersScreen(),
-    MeScreen()
+  static final List<Widget> _widgetOptions = <Widget>[
+    const OrdersScreen(),
+    const MeScreen()
   ];
 
 
@@ -63,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         isAdmin = adminStatus;
         print('Admin: $isAdmin');
         if(isAdmin){
-          _widgetOptions.insert(1, EmployeesScreen());
+          _widgetOptions.insert(1, const EmployeesScreen());
         }
       });
     } catch(e){

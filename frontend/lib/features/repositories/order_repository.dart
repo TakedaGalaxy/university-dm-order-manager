@@ -9,15 +9,15 @@ class OrderRepository extends GetxController {
   static OrderRepository get instance => Get.find();
 
   Future<bool> canDeleteAndDeliveredAndCancelAndEditAndExclude() async {
-    final res = await AuthenticationRepository().getProfileType();
-    if (res == 'waiter') return true;
+    final res = await AuthenticationRepository().getProfile();
+    if (res == 'waiter' || res == 'WAITER') return true;
     if (res == 'ADM' || res == 'adm') return true;
     return false;
   }
 
   Future<bool> completeAndProducing() async {
-    final res = await AuthenticationRepository().getProfileType();
-    if (res == 'chef') return true;
+    final res = await AuthenticationRepository().getProfile();
+    if (res == 'CHEF') return true;
     return false;
   }
 
@@ -41,7 +41,7 @@ class OrderRepository extends GetxController {
         throw Exception('Token not found');
       }
 
-      await MyHttpHelper.putAuthorized('order/delivered/$id', token);
+      await MyHttpHelper.putAuthorized('order/delivered/$id', null, token);
     } catch (e) {
       print('Error in deliveredOrder: $e');
     }
@@ -54,7 +54,7 @@ class OrderRepository extends GetxController {
         throw Exception('Token not found');
       }
 
-      await MyHttpHelper.putAuthorized('order/producing/$id', token);
+      await MyHttpHelper.putAuthorized('order/producing/$id', null, token);
     } catch (e) {
       print('Error in producingOrder: $e');
     }
@@ -67,7 +67,7 @@ class OrderRepository extends GetxController {
         throw Exception('Token not found');
       }
 
-      await MyHttpHelper.putAuthorized('order/complete/$id', token);
+      await MyHttpHelper.putAuthorized('order/complete/$id', null, token);
     } catch (e) {
       print('Error in completeOrder: $e');
     }

@@ -169,7 +169,7 @@ class OrderCard extends StatelessWidget {
                       const SizedBox(height: MySizes.spaceBtwItems)
                       : Container()
                     ),
-                    Obx(() => controller.p2.value && !canceled ? 
+                    Obx(() => controller.p2.value && !canceled? 
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(onPressed: () => controller.completeOrder(id.toString()), child: const Text(MyTexts.markAsComplete))

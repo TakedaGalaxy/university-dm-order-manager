@@ -86,13 +86,13 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.white),
+                          icon: const Icon(Icons.delete, color: Color.fromARGB(255, 105, 102, 102)),
                           onPressed: () {
                             _showDeleteConfirmationDialog(employee['id']);
                           }
                       ),
                       IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.white),
+                        icon: const Icon(Icons.edit, color: Color.fromARGB(255, 105, 102, 102)),
                         onPressed: () {
                           Navigator.push(
                             context,
