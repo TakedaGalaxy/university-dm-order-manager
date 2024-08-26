@@ -4,7 +4,6 @@ import 'package:frontend/features/authentication/screens/login.dart';
 import 'package:frontend/utils/http/http_client.dart';
 import 'package:frontend/utils/localStorage/storage_utility.dart';
 import 'package:get/get.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -50,7 +49,6 @@ class AuthenticationRepository extends GetxController {
     final res = await MyHttpHelper.post('auth/', body);
 
     if (res['accessToken'] != null) {
-      print(res['accessToken']);
       await MyLocalStorage().saveData('@rs:progapp_tk', res['accessToken']);
       await MyLocalStorage().saveData('@rs:progapp_name', res['accessToken']);
     }
@@ -71,7 +69,6 @@ class AuthenticationRepository extends GetxController {
         throw Exception('Failed to load user data');
       }
     } catch (e){
-      print('Error in isAdmin: $e');
       return false;
     }
   }
@@ -86,7 +83,6 @@ class AuthenticationRepository extends GetxController {
       final response = await MyHttpHelper.getAuthorized('auth/account', token);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(data['profileType']);
         return data['profileType'];
       } else {
         throw Exception('Failed to load user data');

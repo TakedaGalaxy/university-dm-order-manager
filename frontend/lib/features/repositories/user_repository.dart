@@ -1,10 +1,8 @@
 import 'dart:convert';
 
+import 'package:frontend/utils/http/http_client.dart';
+import 'package:frontend/utils/localStorage/storage_utility.dart';
 import 'package:get/get.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
-
-import '../../utils/http/http_client.dart';
-import '../../utils/localStorage/storage_utility.dart';
 
 
 class UserRepository extends GetxController{
@@ -13,7 +11,6 @@ class UserRepository extends GetxController{
   Future<void> createEmployee(String userName, String userPassword, String profileTypeName) async {
 
       final tk = await MyLocalStorage().readData('@rs:progapp_tk');
-      print('Username: $userName, Password: $userPassword, ProfileTypeName: $profileTypeName');
 
       Map<String, dynamic> body = {
         'name': userName,
@@ -26,7 +23,6 @@ class UserRepository extends GetxController{
 
   Future<void> updateEmployee(int id, String userName, String userPassword, String profileTypeName) async {
     final tk = await MyLocalStorage().readData('@rs:progapp_tk');
-    print('Id: $id, Username: $userName, Password: $userPassword, ProfileTypeName: $profileTypeName');
 
     Map<String, dynamic> body = {
       'name': userName,
@@ -51,9 +47,7 @@ class UserRepository extends GetxController{
 
   Future<List<Map<String, dynamic>>> getAllEmployees() async {
     final tk = await MyLocalStorage().readData('@rs:progapp_tk');
-    print('Token: $tk');
     final response = await MyHttpHelper.getAllAuthorized('user', tk);
-    print('Response: $response.body');
     List<dynamic> employeesJson = json.decode(response.body) as List<dynamic>;
     List<Map<String, dynamic>> employees = employeesJson.map((e) => {
       'id': e['id'],

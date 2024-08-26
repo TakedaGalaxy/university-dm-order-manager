@@ -226,16 +226,15 @@ array-flatten@1.1.1:
   resolved "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz"
   integrity sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==
 
-"back-end@file:":
+"back-end@file:.":
   version "1.0.0"
-  resolved "file:"
   dependencies:
     "@prisma/client" "^5.17.0"
     "@types/cors" "^2.8.17"
     "@types/express" "^4.17.21"
     "@types/jsonwebtoken" "^9.0.6"
     "@types/ws" "^8.5.12"
-    back-end "file:"
+    back-end "file:../../../../Library/Caches/Yarn/v6/npm-back-end-1.0.0-05c22001-bc7d-44e2-b9be-20adc323369a-1724626391805/node_modules/back-end"
     cors "^2.8.5"
     dotenv "^16.4.5"
     express "^4.19.2"

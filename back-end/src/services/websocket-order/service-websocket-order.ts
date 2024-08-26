@@ -23,6 +23,7 @@ export default class ServiceWebsocketOrder {
     this.listListenUsers = new Map();
 
     this.refWebSocketServer.on('connection', (client) => {
+      console.log("[WEBSOCKET]: NEW CLIENT");
       this.onConnection();
 
       client.on('message', (message) => this.onMessage(client, message.toString()));

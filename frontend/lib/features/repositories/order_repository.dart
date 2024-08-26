@@ -87,7 +87,6 @@ class OrderRepository extends GetxController {
 
       if (resLocal == null) return [];
 
-      print(resLocal);
       return resLocal;
     } catch (e) {
       print('Error in getOrders: $e');

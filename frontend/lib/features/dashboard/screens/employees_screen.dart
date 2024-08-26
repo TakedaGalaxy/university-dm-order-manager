@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/controllers/user_controller.dart';
+import 'package:frontend/features/dashboard/screens/Forms/update_employee.dart';
 import 'package:get/get.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
-import '../../../utils/localStorage/storage_utility.dart';
-import '../../controllers/user_controller.dart';
-import 'Forms/update_employee.dart';
-
 
 
 class EmployeesScreen extends StatefulWidget {
@@ -29,16 +26,11 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   final UserController _userController = Get.put(UserController());
 
-
-  late Future<List<Map<String, dynamic>>> _employeesFuture;
-
   @override
   void initState() {
     super.initState();
-    print('Inicializando EmployeesScreen'); // Adicionar log para depuração
     final tk = MyLocalStorage().readData('@rs:progapp_tk');
     userId = getUserIdFromToken(tk);
-    print('User ID: $userId'); // Adicionar log para depuração
     _userController.updateEmployeesStream();
   }
 
