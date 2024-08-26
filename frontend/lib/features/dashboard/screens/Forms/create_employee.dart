@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/controllers/user_controller.dart';
+import 'package:frontend/utils/constants/colors.dart';
+import 'package:frontend/utils/helpers/helper_functions.dart';
 import 'package:get/get.dart';
 
 class CreateEmployeeForm extends StatefulWidget {
@@ -26,11 +28,14 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
 
   @override
   Widget build(BuildContext context) {
+    final darkMode = MyHelperFunctions.isDarkMode(context);
+    final iconColor = darkMode ? MyColors.white : MyColors.black;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Create Employee'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: iconColor),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -41,13 +46,23 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
         child: Column(
           children: [
             TextField(
+
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Nome'),
+              decoration: InputDecoration(
+                  labelText: 'Nome',
+                  prefixIcon: Icon(
+                      Icons.person,
+                      color: iconColor,),
+              ),
             ),
             TextField(
               controller: passwordController,
               decoration: InputDecoration(
                 labelText: 'Senha',
+                prefixIcon: Icon(
+                  Icons.lock,
+                  color: iconColor,
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -62,7 +77,13 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
               obscureText: _obscurePassword,
             ),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Cargo'),
+              decoration: InputDecoration(
+                  labelText: 'Cargo',
+                  prefixIcon: Icon(
+                    Icons.work,
+                    color: iconColor,
+                  )
+              ),
               items: roles.map((role) {
                 return DropdownMenuItem<String>(
                   value: role['value'],
