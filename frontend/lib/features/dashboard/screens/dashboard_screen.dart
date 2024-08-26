@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/styles/spacing_styles.dart';
 import 'package:frontend/features/dashboard/screens/Forms/create_order.dart';
+import 'package:frontend/features/dashboard/screens/create_order_screen.dart';
 import 'package:frontend/features/dashboard/screens/me_screen.dart';
 import 'package:frontend/features/dashboard/screens/widgets/logout_button.dart';
+import 'package:frontend/utils/constants/colors.dart';
 import 'package:frontend/utils/constants/sizes.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
-import 'package:get/get.dart';
+import 'package:frontend/utils/helpers/helper_functions.dart';
 
 import '../../authentication/repositories/auth_repository.dart';
 import 'Forms/create_employee.dart';
@@ -26,9 +28,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isAdmin = false;
   bool canMakeOrder = false;
 
-  static List<Widget> _widgetOptions = <Widget>[
-    OrdersScreen(),
-    MeScreen()
+  static final List<Widget> _widgetOptions = <Widget>[
+    const OrdersScreen(),
+    const MeScreen()
   ];
 
 
@@ -62,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         isAdmin = adminStatus;
         print('Admin: $isAdmin');
         if(isAdmin){
-          _widgetOptions.insert(1, EmployeesScreen());
+          _widgetOptions.insert(1, const EmployeesScreen());
         }
       });
     } catch(e){
@@ -80,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if(_selectedIndex ==0 && canMakeOrder){
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const CreateOrderForm()),
+        MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
       );
     }
     else if(_selectedIndex ==1 && isAdmin){
@@ -94,19 +96,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = MyHelperFunctions.isDarkMode(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Seja bem vindo de volta!',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'Seja bem vindo de volta!',
+              style: TextStyle(
+                color: dark ? MyColors.white : MyColors.white,
+                fontSize: MySizes.fontSizeLg,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: MySizes.sm),
-            Text(MyTexts.onBoardingSubTitle1,
-                style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              MyTexts.onBoardingSubTitle1,
+              style: TextStyle(
+                color: dark ? MyColors.white : MyColors.white,
+                fontSize: MySizes.fontSizeMd,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
           ],
         ),
-        backgroundColor: const Color(0xFF141218),
+        backgroundColor: dark ? MyColors.darkContainer : MyColors.primary,
         automaticallyImplyLeading: false,
         actions: const [
           LogoutButton(),
@@ -114,17 +130,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: Stack(
         children: [
-          Padding(
-            padding: MySpacingStyle.paddingWithAppBarHeight,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: MySizes.md),
-                Expanded(
-                  child: _widgetOptions.elementAt(_selectedIndex),
-                ),
-              ],
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _widgetOptions.elementAt(_selectedIndex),
+              ),
+            ],
           ),
         ],
       ),
@@ -148,7 +160,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: 'Perfil',
           ),
         ],
+        backgroundColor: dark ? MyColors.darkContainer : MyColors.primary,
         currentIndex: _selectedIndex,
+        unselectedItemColor: MyColors.white,
         selectedItemColor: Theme.of(context).primaryColor,
         onTap: _onItemTapped,
       ),

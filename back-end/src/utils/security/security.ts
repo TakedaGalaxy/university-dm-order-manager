@@ -56,9 +56,10 @@ export default class Security {
 
   verifyToken(token: string): PayloadAcessToken {
     let payload;
-
+console.log(this.key)
     try {
       payload = jwt.verify(token, this.key);
+      console.log(payload);
     } catch (error) {
       console.log(error);
       throw "Token invalido !";

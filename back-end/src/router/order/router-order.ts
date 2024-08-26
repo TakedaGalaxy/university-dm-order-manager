@@ -16,7 +16,7 @@ export default function routerOrder(
   const serviceOrder = new ServiceOrder(prismaClient);
 
   router.post("/",
-    middlewareAuth(prismaClient, security, ["waiter"]),
+    middlewareAuth(prismaClient, security, ["adm","waiter"]),
     middlewareBodyVerify<BodyCreateServiceOrder>(["table", "description"]),
     async (request, response) => {
       const { payloadAccessToken, body } = request;
@@ -61,7 +61,7 @@ export default function routerOrder(
   );
 
   router.put("/:id",
-    middlewareAuth(prismaClient, security, ["waiter"]),
+    middlewareAuth(prismaClient, security, ["adm", "waiter"]),
     middlewareBodyVerify<BodyUpdateServiceOrder>(["table", "description"]),
     async (request, response) => {
       const { payloadAccessToken, params, body } = request;
@@ -80,7 +80,7 @@ export default function routerOrder(
   );
 
   router.delete("/:id",
-    middlewareAuth(prismaClient, security, ["waiter"]),
+    middlewareAuth(prismaClient, security, ["adm", "waiter"]),
     async (request, response) => {
       const { payloadAccessToken, params } = request;
 
@@ -98,7 +98,7 @@ export default function routerOrder(
   );
 
   router.put("/delivered/:id",
-    middlewareAuth(prismaClient, security, ["waiter"]),
+    middlewareAuth(prismaClient, security, ["adm", "waiter"]),
     async (request, response) => {
       const { payloadAccessToken, params } = request;
 

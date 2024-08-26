@@ -18,4 +18,14 @@ class MyValidator {
     if (value == null || value.isEmpty) return 'Company name is required';
     return null;
   }
+
+  static String? validateDescriptionOrder(String? value) {
+    if (value == null || value.isEmpty) return 'Description is required';
+    return null;
+  }
+
+    static String? validateTableOrder(String? value) {
+    if (value == null || value.isEmpty) return 'Table is required';
+    return null;
+  }
 }
