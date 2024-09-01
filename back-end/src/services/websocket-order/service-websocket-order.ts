@@ -22,27 +22,27 @@ export default class ServiceWebsocketOrder {
     this.prismaClient = prismaClient;
     this.listListenUsers = new Map();
 
-    this.refWebSocketServer.on('connection', (client) => {
-      console.log("[WEBSOCKET]: NEW CLIENT");
-      this.onConnection();
+    // this.refWebSocketServer.on('connection', (client) => {
+    //   this.onConnection();
 
-      client.on('message', (message) => this.onMessage(client, message.toString()));
-    });
+    //   client.on('message', (message) => this.onMessage(client, message.toString()));
+    // });
   }
 
-  upgradeConnection() {
-    return (request: http.IncomingMessage, socket: stream.Duplex, head: Buffer) => {
-      const pathname = request.url;
+  // upgradeConnection() {
+  //   return (request: any, socket: stream.Duplex, head: Buffer) => {
+  //     const pathname = request.url;
 
-      if (pathname === '/websocket/order') {
-        this.refWebSocketServer.handleUpgrade(request, socket, head, (ws) => {
-          this.refWebSocketServer.emit('connection', ws, request);
-        });
-      } else {
-        socket.destroy();
-      }
-    };
-  }
+  //     if (pathname === '/websocket/order') {
+  //       console.log('b')
+  //       this.refWebSocketServer.handleUpgrade(request, socket, head, (ws) => {
+  //         this.refWebSocketServer.emit('connection', ws, request);
+  //       });
+  //     } else {
+  //       socket.destroy();
+  //     }
+  //   };
+  // }
 
   async onMessage(client: WebSocket, message: string) {
     try {

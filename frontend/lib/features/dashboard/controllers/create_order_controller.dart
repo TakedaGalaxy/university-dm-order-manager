@@ -6,6 +6,8 @@ import 'package:frontend/features/dashboard/screens/dashboard_screen.dart';
 import 'package:frontend/features/repositories/order_repository.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
 import 'package:frontend/utils/helpers/helper_functions.dart';
+import 'package:frontend/utils/localStorage/storage_utility.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:get/get.dart';
 
 class CreateOrderController extends GetxController {
@@ -17,7 +19,32 @@ class CreateOrderController extends GetxController {
 
   GlobalKey<FormState> createOrderFormKey = GlobalKey<FormState>();
 
-  Future getPermissions () async {
+  Future initialize() async {
+    try {
+      IO.Socket socket = IO.io('http://127.0.0.1:4000', <String, dynamic>{
+        'autoConnect': false,
+        'transports': ['websocket'],
+      });
+      final tk = await MyLocalStorage().readData('@rs:progapp_tk');
+      socket.io.options?['extraHeaders'] = {'authorization': tk};
+      print(tk);
+      socket.connect();
+      socket.onConnect((_) {
+        print('Connection established');
+      });
+      socket.onDisconnect((_) => print('Connection Disconnection'));
+      socket.onConnectError((err) => print(err));
+      socket.onError((err) => print(err));
+      socket.on('new_order', (_) async {
+        print('New Order 3');
+        await getOrders();
+      });
+    } catch (e) {
+      print('Não foi possível conectar ao servidor: $e');
+    }
+  }
+
+  Future getPermissions() async {
     p1.value = await canDeleteAndDeliveredAndCancelAndEditAndExclude();
     p2.value = await completeAndProducing();
   }
@@ -70,7 +97,8 @@ class CreateOrderController extends GetxController {
   }
 
   Future canDeleteAndDeliveredAndCancelAndEditAndExclude() async {
-    return await OrderRepository().canDeleteAndDeliveredAndCancelAndEditAndExclude();
+    return await OrderRepository()
+        .canDeleteAndDeliveredAndCancelAndEditAndExclude();
   }
 
   Future completeAndProducing() async {
