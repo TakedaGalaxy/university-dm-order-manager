@@ -4,12 +4,10 @@ import 'package:frontend/features/dashboard/screens/widgets/confirmation_dialog.
 import 'package:frontend/utils/constants/colors.dart';
 import 'package:frontend/utils/constants/sizes.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
+import 'package:frontend/utils/helpers/helper_functions.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:dotted_border/dotted_border.dart';
-
-
-import '../../../utils/helpers/helper_functions.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -19,11 +17,21 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
+  final controller = Get.put(CreateOrderController());
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  Future<void> init() async {
+    await controller.initialize();
+    await controller.getOrders();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CreateOrderController());
-    controller.getOrders();
-
     return Scaffold(
         body: SingleChildScrollView(
       child: Column(
@@ -64,9 +72,9 @@ class OrderCard extends StatelessWidget {
     super.key,
     this.description = 'Heineken Long neck',
     this.table = '01',
-    this.canceled = false, 
-    this.delivered, 
-    this.completed, 
+    this.canceled = false,
+    this.delivered,
+    this.completed,
     this.beingMande,
     required this.id,
   });
@@ -84,7 +92,7 @@ class OrderCard extends StatelessWidget {
   getStatus() {
     if (canceled) {
       return 'Cancelado';
-    } else if(delivered != null) {
+    } else if (delivered != null) {
       return 'Pedido entregue';
     } else if (completed != null) {
       return 'Pedido concluído';
@@ -130,7 +138,7 @@ class OrderCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(MySizes.defaultSpace),
             child: Stack(
-              children:[
+              children: [
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,14 +164,17 @@ class OrderCard extends StatelessWidget {
                       children: [
                         Text(getStatus(),
                             style: TextStyle(
-                                color:
-                                    canceled ? MyColors.error : getStatus() != 'Pedido entregue' ? MyColors.primary : MyColors.success)),
+                                color: canceled
+                                    ? MyColors.error
+                                    : getStatus() != 'Pedido entregue'
+                                        ? MyColors.primary
+                                        : MyColors.success)),
                       ],
                     ),
                     const SizedBox(height: MySizes.spaceBtwItems),
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Obx(() => controller.p1.value && !canceled && completed != null && delivered == null ?
                           SizedBox(
@@ -238,9 +249,8 @@ class OrderCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ]
-              ),
-                Positioned(
+                  ]),
+                  Positioned(
                   right: 0,
                   top: 0,
                   child: Obx(() => controller.p1.value && !canceled  && (getStatus() != 'Pedido entregue' && getStatus() != 'Pedido concluído')  ?

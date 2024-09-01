@@ -3,7 +3,6 @@ import 'package:frontend/features/authentication/repositories/auth_repository.da
 import 'package:frontend/features/dashboard/screens/dashboard_screen.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
 import 'package:frontend/utils/helpers/helper_functions.dart';
-import 'package:frontend/utils/http/socket.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -25,7 +24,6 @@ class LoginController extends GetxController {
 
   Future signIn() async {
     try {
-      await MySocketHelper().connectToServer();
       // Ideia: Verificar conexão com a internet
       if (!loginFormKey.currentState!.validate()) {
         return const SnackBar(content: Text(MyTexts.loginError));
