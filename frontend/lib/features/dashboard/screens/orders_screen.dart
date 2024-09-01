@@ -26,7 +26,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<void> init() async {
-    await controller.initialize();
     await controller.getOrders();
   }
 
