@@ -8,6 +8,7 @@ import routerUser from "./router/user/router-user";
 import routerOrder from "./router/order/router-order";
 import http from "http";
 import ServiceWebsocketOrder from "./services/websocket-order/service-websocket-order";
+import { SocketManager } from "./services/websocket-order/socket";
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -29,6 +30,8 @@ app.use(cors());
 
 app.use(express.json());
 
+const server = http.createServer(app);
+
 app.get("/", (request, response) => {
   response.status(200).json({ message: "Running" });
 });
@@ -41,13 +44,8 @@ app.use("/auth", routerAuth(prismaClient, security));
 app.use("/user", routerUser(prismaClient, security));
 
 // ### Configurando websocket ###
-
-const serviceWebsocketOrder = new ServiceWebsocketOrder(prismaClient, security);
+const serviceWebsocketOrder = new SocketManager(server, prismaClient, security);
 app.use("/order", routerOrder(prismaClient, security, serviceWebsocketOrder))
-
-const server = http.createServer(app);
-
-server.on('upgrade', serviceWebsocketOrder.upgradeConnection());
 
 // ### Iniciando serviço ###
 

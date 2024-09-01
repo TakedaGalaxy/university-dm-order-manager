@@ -14,11 +14,21 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
+  final controller = Get.put(CreateOrderController());
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  Future<void> init() async {
+    await controller.initialize();
+    await controller.getOrders();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CreateOrderController());
-    controller.getOrders();
-
     return Scaffold(
         body: SingleChildScrollView(
       child: Column(
@@ -53,9 +63,9 @@ class OrderCard extends StatelessWidget {
     super.key,
     this.description = 'Heineken Long neck',
     this.table = '01',
-    this.canceled = false, 
-    this.delivered, 
-    this.completed, 
+    this.canceled = false,
+    this.delivered,
+    this.completed,
     this.beingMande,
     required this.id,
   });
@@ -73,7 +83,7 @@ class OrderCard extends StatelessWidget {
   getSatus() {
     if (canceled) {
       return 'Cancelado';
-    } else if(delivered != null) {
+    } else if (delivered != null) {
       return 'Pedido entregue';
     } else if (completed != null) {
       return 'Pedido concluído';
@@ -119,16 +129,16 @@ class OrderCard extends StatelessWidget {
                     // IconButton(
                     //     onPressed: () {},
                     //     icon: const Icon(Iconsax.edit, size: 24)),
-                    Obx(() => controller.p1.value && !canceled ? 
-                      IconButton(
-                            onPressed: () => controller.cancelOrder(id.toString()),
+                    Obx(() => controller.p1.value && !canceled
+                        ? IconButton(
+                            onPressed: () =>
+                                controller.cancelOrder(id.toString()),
                             icon: const Icon(
                               Iconsax.trash,
                               size: 24,
                               color: MyColors.error,
-                            )) :
-                      Container()
-                    ),
+                            ))
+                        : Container()),
                   ],
                 ),
                 const SizedBox(height: MySizes.spaceBtwItems),
@@ -138,8 +148,11 @@ class OrderCard extends StatelessWidget {
                   children: [
                     Text(getSatus(),
                         style: TextStyle(
-                            color:
-                                canceled ? MyColors.error : getSatus() != 'Pedido entregue' ? MyColors.primary : MyColors.success)),
+                            color: canceled
+                                ? MyColors.error
+                                : getSatus() != 'Pedido entregue'
+                                    ? MyColors.primary
+                                    : MyColors.success)),
                   ],
                 ),
                 const SizedBox(height: MySizes.spaceBtwItems),
@@ -147,35 +160,36 @@ class OrderCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Obx(() => controller.p1.value && !canceled ? 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(onPressed: () => controller.deliveredOrder(id.toString()), child: const Text(MyTexts.markAsDelivered))
-                      ) :
-                      Container()
-                    ),
-                    Obx(() => controller.p2.value && !canceled ? 
-                      const SizedBox(height: MySizes.spaceBtwItems)
-                      : Container()
-                    ),
-                    Obx(() => controller.p2.value && !canceled ? 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(onPressed: () => controller.producingOrder(id.toString()), child: const Text(MyTexts.markAsProducing))
-                      ) :
-                      Container()
-                    ),
-                    Obx(() => controller.p2.value && !canceled ? 
-                      const SizedBox(height: MySizes.spaceBtwItems)
-                      : Container()
-                    ),
-                    Obx(() => controller.p2.value && !canceled? 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(onPressed: () => controller.completeOrder(id.toString()), child: const Text(MyTexts.markAsComplete))
-                      ) :
-                      Container()
-                    ),
+                    Obx(() => controller.p1.value && !canceled
+                        ? SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                                onPressed: () =>
+                                    controller.deliveredOrder(id.toString()),
+                                child: const Text(MyTexts.markAsDelivered)))
+                        : Container()),
+                    Obx(() => controller.p2.value && !canceled
+                        ? const SizedBox(height: MySizes.spaceBtwItems)
+                        : Container()),
+                    Obx(() => controller.p2.value && !canceled
+                        ? SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                                onPressed: () =>
+                                    controller.producingOrder(id.toString()),
+                                child: const Text(MyTexts.markAsProducing)))
+                        : Container()),
+                    Obx(() => controller.p2.value && !canceled
+                        ? const SizedBox(height: MySizes.spaceBtwItems)
+                        : Container()),
+                    Obx(() => controller.p2.value && !canceled
+                        ? SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                                onPressed: () =>
+                                    controller.completeOrder(id.toString()),
+                                child: const Text(MyTexts.markAsComplete)))
+                        : Container()),
                   ],
                 ),
               ]),
