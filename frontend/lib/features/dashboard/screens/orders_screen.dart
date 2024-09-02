@@ -13,11 +13,21 @@ class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
 
   @override
-  State<OrdersScreen> createState() => _OrdersScreenState();
+  State<OrdersScreen> createState() => OrdersScreenState();
 }
 
-class _OrdersScreenState extends State<OrdersScreen> {
+class OrdersScreenState extends State<OrdersScreen> {
   final controller = Get.put(CreateOrderController());
+  String selectedFilter = 'Todos';
+  var filterCounts = {
+    'Todos': 0.obs,
+    'Informado': 0.obs,
+    'Em produção': 0.obs,
+    'Concluído': 0.obs,
+    'Entregue': 0.obs,
+    'Cancelado': 0.obs,
+  }.obs;
+
 
   @override
   void initState() {
@@ -27,6 +37,104 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Future<void> init() async {
     await controller.getOrders();
+    updateFilterCounts();
+  }
+
+
+  void updateFilterCounts() {
+
+    filterCounts['Todos']!.value = getOrderCount('Todos');
+    filterCounts['Informado']!.value = getOrderCount('Informado');
+    filterCounts['Em produção']!.value = getOrderCount('Em produção');
+    filterCounts['Concluído']!.value = getOrderCount('Concluído');
+    filterCounts['Entregue']!.value = getOrderCount('Entregue');
+    filterCounts['Cancelado']!.value = getOrderCount('Cancelado');
+
+    print('Filter counts: $filterCounts');
+  }
+
+
+  List<Map<String, dynamic>> getFilteredOrders() {
+    switch (selectedFilter) {
+      case 'Informado':
+        return controller.orders
+            .where((order) =>
+                order['beingMandeAt'] == null &&
+                order['completedAt'] == null &&
+                order['deliveredAt'] == null &&
+                order['cancelled'] == false)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      case 'Em produção':
+        return controller.orders
+            .where((order) =>
+                order['beingMandeAt'] != null &&
+                order['completedAt'] == null &&
+                order['deliveredAt'] == null &&
+                order['cancelled'] == false)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      case 'Concluído':
+        return controller.orders
+            .where((order) =>
+                order['completedAt'] != null &&
+                order['deliveredAt'] == null &&
+                order['cancelled'] == false)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      case 'Entregue':
+        return controller.orders
+            .where((order) =>
+                order['deliveredAt'] != null && order['cancelled'] == false)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      case 'Cancelado':
+        return controller.orders
+            .where((order) => order['cancelled'] == true)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      default:
+        return controller.orders.cast<Map<String, dynamic>>();
+    }
+  }
+
+  int getOrderCount(String filter) {
+    switch (filter) {
+      case 'Informado':
+        return controller.orders
+            .where((order) =>
+                order['beingMandeAt'] == null &&
+                order['completedAt'] == null &&
+                order['deliveredAt'] == null &&
+                order['cancelled'] == false)
+            .length;
+      case 'Em produção':
+        return controller.orders
+            .where((order) =>
+                order['beingMandeAt'] != null &&
+                order['completedAt'] == null &&
+                order['deliveredAt'] == null &&
+                order['cancelled'] == false)
+            .length;
+      case 'Concluído':
+        return controller.orders
+            .where((order) =>
+                order['completedAt'] != null &&
+                order['deliveredAt'] == null &&
+                order['cancelled'] == false)
+            .length;
+      case 'Entregue':
+        return controller.orders
+            .where((order) =>
+                order['deliveredAt'] != null && order['cancelled'] == false)
+            .length;
+      case 'Cancelado':
+        return controller.orders
+            .where((order) => order['cancelled'] == true)
+            .length;
+      default:
+        return controller.orders.length;
+    }
   }
 
   @override
@@ -39,19 +147,103 @@ class _OrdersScreenState extends State<OrdersScreen> {
           Padding(
             padding: const EdgeInsets.all(MySizes.defaultSpace),
             child: Column(children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: Obx(() => FilterButton(
+                        label: 'Todos',
+                        count: filterCounts['Todos']!,
+                        isSelected: selectedFilter == 'Todos',
+                        onTap: () => setState(() => selectedFilter = 'Todos'),
+                      ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: Obx(() => FilterButton(
+                        label: 'Informado',
+                        count: filterCounts['Informado']!,
+                        isSelected: selectedFilter == 'Informado',
+                        onTap: () => setState(() => selectedFilter = 'Informado'),
+                      ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: Obx(() => FilterButton(
+                        label: 'Em produção',
+                        count: filterCounts['Em produção']!,
+                        isSelected: selectedFilter == 'Em produção',
+                        onTap: () => setState(() => selectedFilter = 'Em produção'),
+                      ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: Obx(() => FilterButton(
+                        label: 'Concluído',
+                        count: filterCounts['Concluído']!,
+                        isSelected: selectedFilter == 'Concluído',
+                        onTap: () => setState(() => selectedFilter = 'Concluído'),
+                      ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: Obx(() => FilterButton(
+                        label: 'Entregue',
+                        count: filterCounts['Entregue']!,
+                        isSelected: selectedFilter == 'Entregue',
+                        onTap: () => setState(() => selectedFilter = 'Entregue'),
+                      ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: Obx(() => FilterButton(
+                        label: 'Cancelado',
+                        count: filterCounts['Cancelado']!,
+                        isSelected: selectedFilter == 'Cancelado',
+                        onTap: () => setState(() => selectedFilter = 'Cancelado'),
+                      ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+              ),
               const SizedBox(height: MySizes.spaceBtwItems),
               Obx(() => Column(
-                    children: controller.orders.map((order) {
+                    children: getFilteredOrders().map((order) {
                       return Column(
                         children: [
                           OrderCard(
-                              description: order['description'],
-                              table: order['table'],
-                              canceled: order['cancelled'] ?? false,
-                              delivered: order['deliveredAt'],
-                              completed: order['completedAt'],
-                              beingMande: order['beingMandeAt'],
-                              id: order['id'],
+                            description: order['description'],
+                            table: order['table'],
+                            canceled: order['cancelled'] ?? false,
+                            delivered: order['deliveredAt'],
+                            completed: order['completedAt'],
+                            beingMande: order['beingMandeAt'],
+                            id: order['id'],
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -63,6 +255,71 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ],
       ),
     ));
+  }
+}
+
+
+
+class FilterButton extends StatefulWidget {
+  const FilterButton({
+    super.key,
+    required this.label,
+    required this.count,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final RxInt count;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  _FilterButtonState createState() => _FilterButtonState();
+}
+
+class _FilterButtonState extends State<FilterButton> {
+  void updateCount(int newCount) {
+    setState(() {
+      widget.count.value = newCount;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final darkMode = MyHelperFunctions.isDarkMode(context);
+    return ElevatedButton(
+      onPressed: widget.onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: darkMode ? widget.isSelected ? const Color(0xFF272d50) : MyColors.darkGrey : widget.isSelected ? MyColors.primary : MyColors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        side: BorderSide(
+          color: darkMode ? widget.isSelected ? const Color(0xFF272d50)  : MyColors.darkGrey : MyColors.primary,
+        ),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)
+        ),
+      ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          children: [
+            Text(widget.label, style: TextStyle(color: darkMode ? MyColors.white : widget.isSelected ? MyColors.white : MyColors.black)),
+            const SizedBox(width: 8),
+            CircleAvatar(
+              radius: 10,
+              backgroundColor: darkMode ? MyColors.white : widget.isSelected ? MyColors.white : MyColors.black,
+              child: Obx(() => Text(
+                widget.count.value.toString(),
+                style: TextStyle(
+                    color: darkMode? MyColors.black : widget.isSelected ? MyColors.black : MyColors.white,
+                    fontSize: 12),
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -105,23 +362,22 @@ class OrderCard extends StatelessWidget {
   borderColor() {
     if (canceled) {
       return MyColors.error;
-    } else if(delivered != null) {
+    } else if (delivered != null) {
       return MyColors.success;
     } else if (completed != null) {
       return MyColors.primary;
     } else if (beingMande != null) {
       return Colors.yellow;
     } else {
-      return MyColors.error;
+      return Colors.orange;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     final darkMode = MyHelperFunctions.isDarkMode(context);
     final controller = Get.put(CreateOrderController());
-    final buttonCollor = darkMode ? const Color(0xFF342c5c) : MyColors.primary;
+    final buttonColor = darkMode ? const Color(0xFF342c5c) : MyColors.primary;
     controller.getPermissions();
 
     return DottedBorder(
@@ -136,9 +392,8 @@ class OrderCard extends StatelessWidget {
           color: darkMode ? const Color(0xFF272d50) : MyColors.white,
           child: Container(
             padding: const EdgeInsets.all(MySizes.defaultSpace),
-            child: Stack(
-              children: [
-                Column(
+            child: Stack(children: [
+              Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -175,103 +430,120 @@ class OrderCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Obx(() => controller.p1.value && !canceled && completed != null && delivered == null ?
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: () => showDialog(
-                                    context: context,
-                                    builder: (context) => ConfirmationDialog(
-                                      title: 'Confirmar entrega',
-                                      content: 'Deseja confirmar a entrega do pedido?',
-                                      onConfirm: () => controller.deliveredOrder(id.toString()),
+                        Obx(() => controller.p1.value &&
+                                !canceled &&
+                                completed != null &&
+                                delivered == null
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                    onPressed: () => showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              ConfirmationDialog(
+                                            title: 'Confirmar entrega',
+                                            content:
+                                                'Deseja confirmar a entrega do pedido?',
+                                            onConfirm: () => controller.deliveredOrder(id.toString()),
+
+                                          ),
+                                        ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: buttonColor,
+                                      side: BorderSide.none,
                                     ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: buttonCollor,
-                                  side: BorderSide.none,
-                                ),
-                                child: const Text(MyTexts.markAsDelivered)
-                            ),
-                          ) :
-                          Container()
-                        ),
-                        Obx(() => controller.p2.value && !canceled ?
-                          const SizedBox(height: MySizes.spaceBtwItems)
-                          : Container()
-                        ),
-                        Obx(() => controller.p2.value && !canceled && (beingMande ==null && completed == null && delivered == null)?
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: () => showDialog(
+                                    child: const Text(MyTexts.markAsDelivered)),
+                              )
+                            : Container()),
+                        Obx(() => controller.p2.value && !canceled
+                            ? const SizedBox(height: MySizes.spaceBtwItems)
+                            : Container()),
+                        Obx(() => controller.p2.value &&
+                                !canceled &&
+                                (beingMande == null &&
+                                    completed == null &&
+                                    delivered == null)
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () => showDialog(
                                     context: context,
                                     builder: (context) => ConfirmationDialog(
                                       title: 'Confirmar produção',
-                                      content: 'Deseja confirmar a produção do pedido?',
+                                      content:
+                                          'Deseja confirmar a produção do pedido?',
                                       onConfirm: () => controller.producingOrder(id.toString()),
+
                                     ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: buttonColor,
+                                    side: BorderSide.none,
+                                  ),
+                                  child: const Text(MyTexts.markAsProducing),
                                 ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: buttonCollor,
-                                  side: BorderSide.none,
-                                ),
-                                child: const Text(MyTexts.markAsProducing),
-                            ),
-                          ) :
-                          Container()
-                        ),
-                        Obx(() => controller.p2.value && !canceled ?
-                          const SizedBox(height: MySizes.spaceBtwItems)
-                          : Container()
-                        ),
-                        Obx(() => controller.p2.value && !canceled && beingMande != null && completed == null && delivered == null?
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: () => showDialog(
+                              )
+                            : Container()),
+                        Obx(() => controller.p2.value && !canceled
+                            ? const SizedBox(height: MySizes.spaceBtwItems)
+                            : Container()),
+                        Obx(() => controller.p2.value &&
+                                !canceled &&
+                                beingMande != null &&
+                                completed == null &&
+                                delivered == null
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () => showDialog(
                                     context: context,
                                     builder: (context) => ConfirmationDialog(
                                       title: 'Confirmar conclusão',
-                                      content: 'Deseja confirmar a conclusão do pedido?',
+                                      content:
+                                          'Deseja confirmar a conclusão do pedido?',
                                       onConfirm: () => controller.completeOrder(id.toString()),
+
                                     ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: buttonColor,
+                                    side: BorderSide.none,
+                                  ),
+                                  child: const Text(MyTexts.markAsComplete),
                                 ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: buttonCollor,
-                                  side: BorderSide.none,
-                                ),
-                                child: const Text(MyTexts.markAsComplete),
-                            ),
-                          ) :
-                          Container()
-                        ),
+                              )
+                            : Container()),
                       ],
                     ),
                   ]),
-                  Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Obx(() => controller.p1.value && !canceled  && (getStatus() != 'Pedido entregue' && getStatus() != 'Pedido concluído')  ?
-                  IconButton(
-                      onPressed: () => showDialog(
-                          context: context,
-                          builder: (context) => ConfirmationDialog(
-                              title: 'Cancelar pedido',
-                              content: 'Deseja cancelar o pedido?',
-                              onConfirm: () => controller.cancelOrder(id.toString())),
-                      ),
-                      tooltip: 'Cancelar pedido',
-                      icon: const Icon(
-                        Iconsax.trash,
-                        size: 24,
-                        color: MyColors.error,
-                      )) :
-                  Container(),
-                  ),
-                )
-              ]
-            ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Obx(
+                  () => controller.p1.value &&
+                          !canceled &&
+                          (getStatus() != 'Pedido entregue' &&
+                              getStatus() != 'Pedido concluído')
+                      ? IconButton(
+                          onPressed: () => showDialog(
+                                context: context,
+                                builder: (context) => ConfirmationDialog(
+                                    title: 'Cancelar pedido',
+                                    content: 'Deseja cancelar o pedido?',
+                                    onConfirm: () => controller.cancelOrder(id.toString()),
+
+                                    ),
+                              ),
+                          tooltip: 'Cancelar pedido',
+                          icon: const Icon(
+                            Iconsax.trash,
+                            size: 24,
+                            color: MyColors.error,
+                          ))
+                      : Container(),
+                ),
+              )
+            ]),
           )),
     );
   }

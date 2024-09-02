@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/authentication/repositories/auth_repository.dart';
 import 'package:frontend/features/dashboard/screens/dashboard_screen.dart';
+import 'package:frontend/features/dashboard/screens/orders_screen.dart';
 import 'package:frontend/features/repositories/order_repository.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
 import 'package:frontend/utils/helpers/helper_functions.dart';
@@ -15,7 +16,9 @@ class CreateOrderController extends GetxController {
   final p1 = false.obs;
   final p2 = false.obs;
 
+
   GlobalKey<FormState> createOrderFormKey = GlobalKey<FormState>();
+
 
   Future getPermissions() async {
     p1.value = await canDeleteAndDeliveredAndCancelAndEditAndExclude();
@@ -52,6 +55,7 @@ class CreateOrderController extends GetxController {
   Future cancelOrder(String id) async {
     await OrderRepository().cancelOrder(id);
     await getOrders();
+    updateOrdersCount();
   }
 
   Future deliveredOrder(String id) async {
@@ -62,11 +66,13 @@ class CreateOrderController extends GetxController {
   Future producingOrder(String id) async {
     await OrderRepository().producingOrder(id);
     await getOrders();
+    updateOrdersCount();
   }
 
   Future completeOrder(String id) async {
     await OrderRepository().completeOrder(id);
     await getOrders();
+    updateOrdersCount();
   }
 
   Future canDeleteAndDeliveredAndCancelAndEditAndExclude() async {
@@ -77,4 +83,10 @@ class CreateOrderController extends GetxController {
   Future completeAndProducing() async {
     return await OrderRepository().completeAndProducing();
   }
+
+  void updateOrdersCount(){
+    OrdersScreenState().updateFilterCounts();
+  }
+
+
 }
