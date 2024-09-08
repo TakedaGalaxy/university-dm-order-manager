@@ -16,8 +16,11 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController passwordConfirmationController =
+      TextEditingController();
 
   bool _obscurePassword = true;
+  bool _obscurePasswordConfirmation = true;
   String? _selectedRole;
 
   final List<Map<String, String>> roles = [
@@ -33,7 +36,7 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Employee'),
+        title: const Text('Create Employee'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: iconColor),
           onPressed: () {
@@ -46,13 +49,13 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
         child: Column(
           children: [
             TextField(
-
               controller: nameController,
               decoration: InputDecoration(
-                  labelText: 'Nome',
-                  prefixIcon: Icon(
-                      Icons.person,
-                      color: iconColor,),
+                labelText: 'Nome',
+                prefixIcon: Icon(
+                  Icons.person,
+                  color: iconColor,
+                ),
               ),
             ),
             TextField(
@@ -76,14 +79,43 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
               ),
               obscureText: _obscurePassword,
             ),
+            TextFormField(
+              controller: passwordConfirmationController,
+              validator: (value) {
+                if (value != passwordController.text) {
+                  return 'As senhas não coincidem';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                labelText: 'Confirmar Senha',
+                prefixIcon: Icon(
+                  Icons.lock,
+                  color: iconColor,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePasswordConfirmation
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePasswordConfirmation =
+                          !_obscurePasswordConfirmation;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _obscurePasswordConfirmation,
+            ),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                   labelText: 'Cargo',
                   prefixIcon: Icon(
                     Icons.work,
                     color: iconColor,
-                  )
-              ),
+                  )),
               items: roles.map((role) {
                 return DropdownMenuItem<String>(
                   value: role['value'],
@@ -101,6 +133,10 @@ class _CreateEmployeeFormState extends State<CreateEmployeeForm> {
             ElevatedButton(
               onPressed: () {
                 if (_selectedRole != null) {
+                  if (passwordController.text != passwordConfirmationController.text) {
+                    MyHelperFunctions.showSnackBar("As senhas não coincidem", "Red");
+                    return;
+                  }
                   userController.createEmployee(
                     nameController.text,
                     passwordController.text,

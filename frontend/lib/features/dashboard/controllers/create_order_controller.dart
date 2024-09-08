@@ -17,12 +17,14 @@ class CreateOrderController extends GetxController {
   final p2 = false.obs;
 
 
+
   GlobalKey<FormState> createOrderFormKey = GlobalKey<FormState>();
 
 
   Future getPermissions() async {
     p1.value = await canDeleteAndDeliveredAndCancelAndEditAndExclude();
     p2.value = await completeAndProducing();
+
   }
 
   Future redirect() async {
@@ -79,6 +81,7 @@ class CreateOrderController extends GetxController {
     return await OrderRepository()
         .canDeleteAndDeliveredAndCancelAndEditAndExclude();
   }
+
 
   Future completeAndProducing() async {
     return await OrderRepository().completeAndProducing();

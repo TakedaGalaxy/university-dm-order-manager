@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/authentication/repositories/auth_repository.dart';
 import 'package:frontend/features/dashboard/controllers/create_order_controller.dart';
 import 'package:frontend/features/dashboard/screens/widgets/confirmation_dialog.dart';
 import 'package:frontend/utils/constants/colors.dart';
@@ -10,7 +11,8 @@ import 'package:iconsax/iconsax.dart';
 import 'package:dotted_border/dotted_border.dart';
 
 class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({super.key});
+  final bool isOrderHistory;
+  const OrdersScreen({super.key, this.isOrderHistory = false});
 
   @override
   State<OrdersScreen> createState() => OrdersScreenState();
@@ -18,7 +20,7 @@ class OrdersScreen extends StatefulWidget {
 
 class OrdersScreenState extends State<OrdersScreen> {
   final controller = Get.put(CreateOrderController());
-  String selectedFilter = 'Todos';
+  String selectedFilter = '';
   var filterCounts = {
     'Todos': 0.obs,
     'Informado': 0.obs,
@@ -28,6 +30,7 @@ class OrdersScreenState extends State<OrdersScreen> {
     'Cancelado': 0.obs,
   }.obs;
 
+  String userRole = '';
 
   @override
   void initState() {
@@ -36,13 +39,28 @@ class OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<void> init() async {
+    userRole = await AuthenticationRepository.instance.getProfile();
+    print('User role in init: $userRole');
+    setFilter(userRole);
     await controller.getOrders();
     updateFilterCounts();
+    setState(() {});
+  }
+
+  void setFilter(String userRole){
+    print ('User role: $userRole');
+
+    if(userRole == 'ADM'){
+      selectedFilter = 'Todos';
+    } else if(userRole == 'CHEF'){
+      selectedFilter = 'Informado';
+    } else if(userRole == 'WAITER'){
+      selectedFilter = 'Concluído';
+    }
   }
 
 
   void updateFilterCounts() {
-
     filterCounts['Todos']!.value = getOrderCount('Todos');
     filterCounts['Informado']!.value = getOrderCount('Informado');
     filterCounts['Em produção']!.value = getOrderCount('Em produção');
@@ -52,7 +70,6 @@ class OrdersScreenState extends State<OrdersScreen> {
 
     print('Filter counts: $filterCounts');
   }
-
 
   List<Map<String, dynamic>> getFilteredOrders() {
     switch (selectedFilter) {
@@ -139,7 +156,17 @@ class OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final darkMode = MyHelperFunctions.isDarkMode(context);
     return Scaffold(
+    appBar: widget.isOrderHistory ? AppBar(
+        title: const Text('Histórico de pedidos'),
+        leading: IconButton(
+          icon: Icon(Iconsax.arrow_left,
+              color: darkMode ? MyColors.white : MyColors.black,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ) : null,
         body: SingleChildScrollView(
       child: Column(
         children: [
@@ -147,89 +174,117 @@ class OrdersScreenState extends State<OrdersScreen> {
           Padding(
             padding: const EdgeInsets.all(MySizes.defaultSpace),
             child: Column(children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      child: Obx(() => FilterButton(
-                        label: 'Todos',
-                        count: filterCounts['Todos']!,
-                        isSelected: selectedFilter == 'Todos',
-                        onTap: () => setState(() => selectedFilter = 'Todos'),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 4),
+                    if (widget.isOrderHistory || userRole == 'ADM') ...[
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 80, maxWidth: 105),
+                          child: Obx(
+                            () => FilterButton(
+                              label: 'Todos',
+                              count: filterCounts['Todos']!,
+                              isSelected: selectedFilter == 'Todos',
+                              onTap: () =>
+                                  setState(() => selectedFilter = 'Todos'),
+                            ),
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 4),
+                    ],
+                    if (widget.isOrderHistory || userRole == 'ADM' || userRole == 'CHEF') ...[
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+                          child: Obx(
+                            () => FilterButton(
+                              label: 'Informado',
+                              count: filterCounts['Informado']!,
+                              isSelected: selectedFilter == 'Informado',
+                              onTap: () =>
+                                  setState(() => selectedFilter = 'Informado'),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      child: Obx(() => FilterButton(
-                        label: 'Informado',
-                        count: filterCounts['Informado']!,
-                        isSelected: selectedFilter == 'Informado',
-                        onTap: () => setState(() => selectedFilter = 'Informado'),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+                          child: Obx(
+                            () => FilterButton(
+                              label: 'Em produção',
+                              count: filterCounts['Em produção']!,
+                              isSelected: selectedFilter == 'Em produção',
+                              onTap: () =>
+                                  setState(() => selectedFilter = 'Em produção'),
+                            ),
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 4),
+                    ],
+                    if (widget.isOrderHistory || userRole == 'ADM' || userRole == 'WAITER') ...[
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+                          child: Obx(
+                            () => FilterButton(
+                              label: 'Concluído',
+                              count: filterCounts['Concluído']!,
+                              isSelected: selectedFilter == 'Concluído',
+                              onTap: () =>
+                                  setState(() => selectedFilter = 'Concluído'),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      child: Obx(() => FilterButton(
-                        label: 'Em produção',
-                        count: filterCounts['Em produção']!,
-                        isSelected: selectedFilter == 'Em produção',
-                        onTap: () => setState(() => selectedFilter = 'Em produção'),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+                          child: Obx(
+                            () => FilterButton(
+                              label: 'Entregue',
+                              count: filterCounts['Entregue']!,
+                              isSelected: selectedFilter == 'Entregue',
+                              onTap: () =>
+                                  setState(() => selectedFilter = 'Entregue'),
+                            ),
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+                          child: Obx(
+                            () => FilterButton(
+                              label: 'Cancelado',
+                              count: filterCounts['Cancelado']!,
+                              isSelected: selectedFilter == 'Cancelado',
+                              onTap: () =>
+                                  setState(() => selectedFilter = 'Cancelado'),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      child: Obx(() => FilterButton(
-                        label: 'Concluído',
-                        count: filterCounts['Concluído']!,
-                        isSelected: selectedFilter == 'Concluído',
-                        onTap: () => setState(() => selectedFilter = 'Concluído'),
-                      ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      child: Obx(() => FilterButton(
-                        label: 'Entregue',
-                        count: filterCounts['Entregue']!,
-                        isSelected: selectedFilter == 'Entregue',
-                        onTap: () => setState(() => selectedFilter = 'Entregue'),
-                      ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      child: Obx(() => FilterButton(
-                        label: 'Cancelado',
-                        count: filterCounts['Cancelado']!,
-                        isSelected: selectedFilter == 'Cancelado',
-                        onTap: () => setState(() => selectedFilter = 'Cancelado'),
-                      ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                ],
+                      const SizedBox(width: 4),
+                    ],
+                  ],
+                ),
               ),
               const SizedBox(height: MySizes.spaceBtwItems),
               Obx(() => Column(
@@ -257,8 +312,6 @@ class OrdersScreenState extends State<OrdersScreen> {
     ));
   }
 }
-
-
 
 class FilterButton extends StatefulWidget {
   const FilterButton({
@@ -291,32 +344,57 @@ class _FilterButtonState extends State<FilterButton> {
     return ElevatedButton(
       onPressed: widget.onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: darkMode ? widget.isSelected ? const Color(0xFF272d50) : MyColors.darkGrey : widget.isSelected ? MyColors.primary : MyColors.white,
+        backgroundColor: darkMode
+            ? widget.isSelected
+                ? const Color(0xFF272d50)
+                : MyColors.darkGrey
+            : widget.isSelected
+                ? MyColors.primary
+                : MyColors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         side: BorderSide(
-          color: darkMode ? widget.isSelected ? const Color(0xFF272d50)  : MyColors.darkGrey : MyColors.primary,
+          color: darkMode
+              ? widget.isSelected
+                  ? const Color(0xFF272d50)
+                  : MyColors.darkGrey
+              : MyColors.primary,
         ),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          children: [
-            Text(widget.label, style: TextStyle(color: darkMode ? MyColors.white : widget.isSelected ? MyColors.white : MyColors.black)),
-            const SizedBox(width: 8),
-            CircleAvatar(
-              radius: 10,
-              backgroundColor: darkMode ? MyColors.white : widget.isSelected ? MyColors.white : MyColors.black,
-              child: Obx(() => Text(
-                widget.count.value.toString(),
-                style: TextStyle(
-                    color: darkMode? MyColors.black : widget.isSelected ? MyColors.black : MyColors.white,
-                    fontSize: 12),
-              )),
-            ),
-          ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            children: [
+              Text(widget.label,
+                  style: TextStyle(
+                      color: darkMode
+                          ? MyColors.white
+                          : widget.isSelected
+                              ? MyColors.white
+                              : MyColors.black)),
+              const SizedBox(width: 8),
+              CircleAvatar(
+                radius: 10,
+                backgroundColor: darkMode
+                    ? MyColors.white
+                    : widget.isSelected
+                        ? MyColors.white
+                        : MyColors.black,
+                child: Obx(() => Text(
+                      widget.count.value.toString(),
+                      style: TextStyle(
+                          color: darkMode
+                              ? MyColors.black
+                              : widget.isSelected
+                                  ? MyColors.black
+                                  : MyColors.white,
+                          fontSize: 12),
+                    )),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -444,8 +522,8 @@ class OrderCard extends StatelessWidget {
                                             title: 'Confirmar entrega',
                                             content:
                                                 'Deseja confirmar a entrega do pedido?',
-                                            onConfirm: () => controller.deliveredOrder(id.toString()),
-
+                                            onConfirm: () => controller
+                                                .deliveredOrder(id.toString()),
                                           ),
                                         ),
                                     style: ElevatedButton.styleFrom(
@@ -472,8 +550,8 @@ class OrderCard extends StatelessWidget {
                                       title: 'Confirmar produção',
                                       content:
                                           'Deseja confirmar a produção do pedido?',
-                                      onConfirm: () => controller.producingOrder(id.toString()),
-
+                                      onConfirm: () => controller
+                                          .producingOrder(id.toString()),
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
@@ -501,8 +579,8 @@ class OrderCard extends StatelessWidget {
                                       title: 'Confirmar conclusão',
                                       content:
                                           'Deseja confirmar a conclusão do pedido?',
-                                      onConfirm: () => controller.completeOrder(id.toString()),
-
+                                      onConfirm: () => controller
+                                          .completeOrder(id.toString()),
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
@@ -520,19 +598,18 @@ class OrderCard extends StatelessWidget {
                 right: 0,
                 top: 0,
                 child: Obx(
-                  () => controller.p1.value &&
-                          !canceled &&
+                  () => controller.p1.value && !canceled &&
                           (getStatus() != 'Pedido entregue' &&
                               getStatus() != 'Pedido concluído')
                       ? IconButton(
                           onPressed: () => showDialog(
                                 context: context,
                                 builder: (context) => ConfirmationDialog(
-                                    title: 'Cancelar pedido',
-                                    content: 'Deseja cancelar o pedido?',
-                                    onConfirm: () => controller.cancelOrder(id.toString()),
-
-                                    ),
+                                  title: 'Cancelar pedido',
+                                  content: 'Deseja cancelar o pedido?',
+                                  onConfirm: () =>
+                                      controller.cancelOrder(id.toString()),
+                                ),
                               ),
                           tooltip: 'Cancelar pedido',
                           icon: const Icon(

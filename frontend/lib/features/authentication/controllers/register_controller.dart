@@ -8,11 +8,13 @@ import 'package:get_storage/get_storage.dart';
 
 class RegisterController extends GetxController {
   final hidePassword = true.obs;
+  final hidePasswordConfirmation = true.obs;
 
   final localStorage = GetStorage();
 
   final userName = TextEditingController();
   final userPassword = TextEditingController();
+  final confirmPassword = TextEditingController();
   final companyName = TextEditingController();
 
   GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
