@@ -18,8 +18,11 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController passwordConfirmationController =
+  TextEditingController();
 
   bool _obscurePassword = true;
+  bool _obscurePasswordConfirmation = true;
   String? _selectedRole;
 
   final List<Map<String, String>> roles = [
@@ -84,6 +87,36 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
               ),
               obscureText: _obscurePassword,
             ),
+            TextFormField(
+              controller: passwordConfirmationController,
+              validator: (value) {
+                if (value != passwordController.text) {
+                  return 'As senhas não coincidem';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                labelText: 'Confirmar Senha',
+                prefixIcon: Icon(
+                  Icons.lock,
+                  color: iconColor,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePasswordConfirmation
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePasswordConfirmation =
+                      !_obscurePasswordConfirmation;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _obscurePasswordConfirmation,
+            ),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Cargo',
@@ -112,6 +145,11 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
               ),
               onPressed: () {
                 if (_selectedRole != null) {
+                  if (passwordController.text != passwordConfirmationController.text) {
+                    MyHelperFunctions.showSnackBar("As senhas não coincidem",
+                        "Red");
+                    return;
+                  }
                   userController.updateEmployee(widget.employee['id'],
                     nameController.text,
                     passwordController.text,
