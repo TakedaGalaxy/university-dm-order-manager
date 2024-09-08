@@ -58,6 +58,7 @@ class LoginForm extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(onPressed: () => controller.signIn(), child: const Text(MyTexts.signIn))
             ),
+            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(onPressed: () => Get.to(() => const RegisterScreen()), child: const Text(MyTexts.createAccount))

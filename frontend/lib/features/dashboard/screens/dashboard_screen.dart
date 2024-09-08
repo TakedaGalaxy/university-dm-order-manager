@@ -12,14 +12,12 @@ import 'Forms/create_employee.dart';
 import 'orders_screen.dart';
 import 'employees_screen.dart';
 
-
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
-
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
@@ -30,7 +28,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const OrdersScreen(),
     const MeScreen()
   ];
-
 
   @override
   void initState() {
@@ -43,14 +40,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       String userRole = await AuthenticationRepository.instance.getProfile();
       bool orderStatus = false;
-      if(userRole == 'ADM' || userRole == 'WAITER'){
+      if (userRole == 'ADM' || userRole == 'WAITER') {
         orderStatus = true;
       }
 
       setState(() {
         canMakeOrder = orderStatus;
       });
-    } catch(e){
+    } catch (e) {
       print('Error in orderStatus: $e');
     }
   }
@@ -61,11 +58,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         isAdmin = adminStatus;
         print('Admin: $isAdmin');
-        if(isAdmin){
+        if (isAdmin) {
           _widgetOptions.insert(1, const EmployeesScreen());
         }
       });
-    } catch(e){
+    } catch (e) {
       print('Error in adminStatus: $e');
     }
   }
@@ -73,24 +70,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      print('Selected index: $_selectedIndex');
     });
   }
 
-  void _onFabPressed(){
-    if(_selectedIndex ==0 && canMakeOrder){
+  void _onFabPressed() {
+    if (_selectedIndex == 0 && canMakeOrder) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
       );
-    }
-    else if(_selectedIndex ==1 && isAdmin){
+    } else if (_selectedIndex == 1 && isAdmin) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const CreateEmployeeForm()),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -138,21 +134,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      floatingActionButton: (isAdmin && _selectedIndex < 2|| canMakeOrder  && _selectedIndex < 1)  ? FloatingActionButton(
-        onPressed: _onFabPressed,
-        child: const Icon(Icons.add),
-      ) : null,
-      bottomNavigationBar:BottomNavigationBar(
+      floatingActionButton: Stack(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (!isAdmin && _selectedIndex == 0)
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const OrdersScreen(
+                                isOrderHistory: true,
+                              )),
+                    );
+                  },
+                  child: const Icon(Icons.history),
+                ),
+              const SizedBox(height: 16),
+              if ((isAdmin && _selectedIndex == 1) ||
+                  (canMakeOrder && _selectedIndex == 0))
+                FloatingActionButton(
+                  onPressed: _onFabPressed,
+                  child: const Icon(Icons.add),
+                ),
+            ],
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Pedidos',
           ),
-          if(isAdmin)
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Funcionários',
-          ),
+          if (isAdmin)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: 'Funcionários',
+            ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Perfil',
