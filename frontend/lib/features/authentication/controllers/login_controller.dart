@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/authentication/repositories/auth_repository.dart';
-import 'package:frontend/features/dashboard/controllers/socket.dart';
 import 'package:frontend/features/dashboard/screens/dashboard_screen.dart';
 import 'package:frontend/utils/constants/text_strings.dart';
 import 'package:frontend/utils/helpers/helper_functions.dart';
@@ -37,7 +36,6 @@ class LoginController extends GetxController {
       userPassword.text = '';
       companyName.text = '';
 
-      await MySocketHelper().initialize();
       Get.to(() => const DashboardScreen());
     } catch (e) {
       MyHelperFunctions.showSnackBar(MyTexts.loginError, 'Red');

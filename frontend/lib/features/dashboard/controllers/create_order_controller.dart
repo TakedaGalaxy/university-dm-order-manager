@@ -16,15 +16,11 @@ class CreateOrderController extends GetxController {
   final p1 = false.obs;
   final p2 = false.obs;
 
-
-
   GlobalKey<FormState> createOrderFormKey = GlobalKey<FormState>();
-
 
   Future getPermissions() async {
     p1.value = await canDeleteAndDeliveredAndCancelAndEditAndExclude();
     p2.value = await completeAndProducing();
-
   }
 
   Future redirect() async {
@@ -39,7 +35,7 @@ class CreateOrderController extends GetxController {
       }
 
       await OrderRepository().createOrder(description.text, table.text);
-      await getOrders();
+      //await getOrders();
 
       description.text = '';
       table.text = '';
@@ -54,26 +50,36 @@ class CreateOrderController extends GetxController {
     orders.value = await OrderRepository().getOrders();
   }
 
+  void updateOrder(dynamic newOrder) {
+    final index = orders.indexWhere((order) => order.id == newOrder.id);
+
+    if (index != -1) {
+      orders[index] = newOrder;
+    } else {
+      orders.add(newOrder);
+    }
+  }
+
   Future cancelOrder(String id) async {
     await OrderRepository().cancelOrder(id);
-    await getOrders();
+    //await getOrders();
     updateOrdersCount();
   }
 
   Future deliveredOrder(String id) async {
     await OrderRepository().deliveredOrder(id);
-    await getOrders();
+    //await getOrders();
   }
 
   Future producingOrder(String id) async {
     await OrderRepository().producingOrder(id);
-    await getOrders();
+    //await getOrders();
     updateOrdersCount();
   }
 
   Future completeOrder(String id) async {
     await OrderRepository().completeOrder(id);
-    await getOrders();
+    //await getOrders();
     updateOrdersCount();
   }
 
@@ -82,14 +88,11 @@ class CreateOrderController extends GetxController {
         .canDeleteAndDeliveredAndCancelAndEditAndExclude();
   }
 
-
   Future completeAndProducing() async {
     return await OrderRepository().completeAndProducing();
   }
 
-  void updateOrdersCount(){
+  void updateOrdersCount() {
     OrdersScreenState().updateFilterCounts();
   }
-
-
 }
