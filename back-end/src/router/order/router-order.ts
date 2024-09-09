@@ -4,19 +4,19 @@ import Security from "../../utils/security/security";
 import { middlewareAuth } from "../../middleware/auth/auth";
 import middlewareBodyVerify from "../../middleware/body-verify/body-verify";
 import ServiceOrder, { BodyCreateServiceOrder, BodyUpdateServiceOrder } from "../../services/order/service-order";
-import { SocketManager } from "../../services/websocket-order/socket";
+import ServiceWebsocketOrder from "../../services/websocket-order/service-websocket-order";
 
 export default function routerOrder(
   prismaClient: PrismaClient,
   security: Security,
-  serviceWebsocketOrder: SocketManager
+  serviceWebsocketOrder: ServiceWebsocketOrder
 ): Router {
   const router = Router();
 
   const serviceOrder = new ServiceOrder(prismaClient);
 
   router.post("/",
-    middlewareAuth(prismaClient, security, ["adm","waiter"]),
+    middlewareAuth(prismaClient, security, ["adm", "waiter"]),
     middlewareBodyVerify<BodyCreateServiceOrder>(["table", "description"]),
     async (request, response) => {
       const { payloadAccessToken, body } = request;
@@ -24,7 +24,7 @@ export default function routerOrder(
       try {
         const { message, order } = await serviceOrder.create(payloadAccessToken!, body);
         response.status(200).json(message);
-        serviceWebsocketOrder.notifyNewOrder(order);
+        serviceWebsocketOrder.broadcastUpdateOrder(order);
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });
@@ -69,7 +69,7 @@ export default function routerOrder(
       try {
         response.status(200).json(await serviceOrder.update(payloadAccessToken!, Number(params.id), body));
 
-        serviceWebsocketOrder.notifyNewOrder(
+        serviceWebsocketOrder.broadcastUpdateOrder(
           await serviceOrder.getById(payloadAccessToken!, Number(params.id))
         );
       } catch (error) {
@@ -87,7 +87,7 @@ export default function routerOrder(
       try {
         response.status(200).json(await serviceOrder.cancel(payloadAccessToken!, Number(params.id)));
 
-        serviceWebsocketOrder.notifyNewOrder(
+        serviceWebsocketOrder.broadcastUpdateOrder(
           await serviceOrder.getById(payloadAccessToken!, Number(params.id))
         );
       } catch (error) {
@@ -105,7 +105,7 @@ export default function routerOrder(
       try {
         response.status(200).json(await serviceOrder.setDelivered(payloadAccessToken!, Number(params.id)));
 
-        serviceWebsocketOrder.notifyNewOrder(
+        serviceWebsocketOrder.broadcastUpdateOrder(
           await serviceOrder.getById(payloadAccessToken!, Number(params.id))
         );
       } catch (error) {
@@ -123,7 +123,7 @@ export default function routerOrder(
       try {
         response.status(200).json(await serviceOrder.setProducing(payloadAccessToken!, Number(params.id)));
 
-        serviceWebsocketOrder.notifyNewOrder(
+        serviceWebsocketOrder.broadcastUpdateOrder(
           await serviceOrder.getById(payloadAccessToken!, Number(params.id))
         );
       } catch (error) {
@@ -141,9 +141,23 @@ export default function routerOrder(
       try {
         response.status(200).json(await serviceOrder.setComplete(payloadAccessToken!, Number(params.id)));
 
-        serviceWebsocketOrder.notifyNewOrder(
+        serviceWebsocketOrder.broadcastUpdateOrder(
           await serviceOrder.getById(payloadAccessToken!, Number(params.id))
         );
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ message: "Error", description: `${error}` });
+      }
+    }
+  );
+
+  router.get("/history", middlewareAuth(prismaClient, security, ["adm"]),
+    async (request, response) => {
+      const { payloadAccessToken } = request;
+
+      try {
+        response.status(200).json(await serviceOrder.getHistory(payloadAccessToken!));
+
       } catch (error) {
         console.error(error);
         response.status(500).json({ message: "Error", description: `${error}` });

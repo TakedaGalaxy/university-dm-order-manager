@@ -5,6 +5,7 @@ import Security, { PayloadAcessToken } from "../../utils/security/security";
 import { PrismaClient } from "@prisma/client";
 import { generateMessage } from "../../utils/message/message";
 import { TypeOrder } from "../order/service-order";
+import { ProfileType } from "../../types/types";
 
 type TypeCompanyId = number;
 type TypeUserId = number;
@@ -22,27 +23,26 @@ export default class ServiceWebsocketOrder {
     this.prismaClient = prismaClient;
     this.listListenUsers = new Map();
 
-    // this.refWebSocketServer.on('connection', (client) => {
-    //   this.onConnection();
+    this.refWebSocketServer.on('connection', (client) => {
+      this.onConnection();
 
-    //   client.on('message', (message) => this.onMessage(client, message.toString()));
-    // });
+      client.on('message', (message) => this.onMessage(client, message.toString()));
+    });
   }
 
-  // upgradeConnection() {
-  //   return (request: any, socket: stream.Duplex, head: Buffer) => {
-  //     const pathname = request.url;
+  upgradeConnection() {
+    return (request: http.IncomingMessage, socket: stream.Duplex, head: Buffer) => {
+      const pathname = request.url;
 
-  //     if (pathname === '/websocket/order') {
-  //       console.log('b')
-  //       this.refWebSocketServer.handleUpgrade(request, socket, head, (ws) => {
-  //         this.refWebSocketServer.emit('connection', ws, request);
-  //       });
-  //     } else {
-  //       socket.destroy();
-  //     }
-  //   };
-  // }
+      if (pathname === '/websocket/order') {
+        this.refWebSocketServer.handleUpgrade(request, socket, head, (ws) => {
+          this.refWebSocketServer.emit('connection', ws, request);
+        });
+      } else {
+        socket.destroy();
+      }
+    };
+  }
 
   async onMessage(client: WebSocket, message: string) {
     try {
@@ -130,8 +130,25 @@ export default class ServiceWebsocketOrder {
   broadcastUpdateOrder(order: TypeOrder) {
     const usersList = this.listListenUsers.get(order.companyId);
 
-    usersList?.forEach((clientWebSocket) => {
-      clientWebSocket.send(JSON.stringify(order));
+    usersList?.forEach(async (clientWebSocket, id) => {
+
+      const user = await this.prismaClient.user.findUnique({ where: { id } });
+
+      if (user === null) return;
+
+      const { profileTypeName } = user;
+
+      switch (profileTypeName) {
+        case ProfileType.adm:
+          clientWebSocket.send(JSON.stringify(order));
+          break;
+        case ProfileType.chef:
+          clientWebSocket.send(JSON.stringify(order));
+          break;
+        case ProfileType.waiter:
+          clientWebSocket.send(JSON.stringify(order));
+          break;
+      }
     });
   }
 }

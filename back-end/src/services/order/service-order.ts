@@ -270,6 +270,33 @@ export default class ServiceOrder {
 
     return generateMessage("Sucesso", "Pedido marcado como sendo feito !");
   }
+
+  async getHistory(payloadAccessToken: PayloadAcessToken) {
+    const { companyId } = payloadAccessToken;
+
+    const orders = await this.prismaClient.order.findMany({
+      where: {
+        companyId: companyId,
+        deliveredByUser: { isNot: null },
+      },
+      select: {
+        id: true,
+        table: true,
+        description: true,
+        createdByUser: { select: { id: true, name: true } },
+        createdAt: true,
+        beingMadeByUser: { select: { id: true, name: true } },
+        beingMandeAt: true,
+        completedByUser: { select: { id: true, name: true } },
+        completedAt: true,
+        deliveredByUser: { select: { id: true, name: true } },
+        deliveredAt: true,
+        cancelled: true
+      }
+    })
+
+    return orders;
+  }
 }
 
 export type BodyCreateServiceOrder = {
