@@ -52,11 +52,34 @@ class RegisterForm extends StatelessWidget {
                 ), 
               ),
             )),
+            const SizedBox(height: MySizes.spaceBtwInputFields),
+            Obx(() => TextFormField(
+              controller: controller.confirmPassword,
+              validator: (value) {
+                if (value != controller.userPassword.text) {
+                  return 'As senhas não coincidem';
+                }
+                return null;
+              },
+              obscureText: controller.hidePasswordConfirmation.value,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Iconsax.password_check),
+                labelText: 'Confirmar Senha',
+                suffixIcon: IconButton(
+                    onPressed: () =>
+                    controller.hidePasswordConfirmation.value = !controller.hidePasswordConfirmation.value,
+                    icon: Icon(
+                        controller.hidePasswordConfirmation.value ? Iconsax.eye_slash : Iconsax.eye
+                    )
+                ),
+              ),
+            )),
             const SizedBox(height: MySizes.spaceBtwSections),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(onPressed: () => controller.signUp(), child: const Text(MyTexts.createAccount))
             ),
+            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(onPressed: () => Get.back(), child: const Text(MyTexts.back))
