@@ -140,7 +140,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (!isAdmin && _selectedIndex == 0)
-                /*FloatingActionButton(
+                FloatingActionButton(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -151,7 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                   child: const Icon(Icons.history),
-                ),*/
+                ),
               const SizedBox(height: 16),
               if ((isAdmin && _selectedIndex == 1) ||
                   (canMakeOrder && _selectedIndex == 0))
